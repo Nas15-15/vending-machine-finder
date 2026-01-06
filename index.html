@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vending Machine Location Finder</title>
+    <link rel="stylesheet" href="/src/styles/main.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body class="home-body">
+    <div class="container">
+        <header class="top-header">
+            <div class="top-nav">
+                <div class="profile-menu-container hidden" id="profileMenuContainer">
+                    <div class="profile-inline">
+                        <div class="profile-avatar">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </div>
+                        <span id="profileEmail">Account</span>
+                    </div>
+                    <button class="ghost-cta" id="logoutBtn" type="button">Sign out</button>
+                </div>
+
+                <div id="ownerControlPill" class="owner-control-pill hidden" aria-live="polite">
+                    <span>Owner access active</span>
+                    <a id="ownerControlLink" href="owner-control-center.html" class="owner-control-link">Open control center</a>
+                </div>
+                <div id="ownerModeIndicator" class="owner-mode-indicator hidden" role="status" aria-live="polite" aria-hidden="true">
+                    <div class="owner-mode-dot" aria-hidden="true"></div>
+                    <div class="owner-mode-text">
+                        <span class="owner-mode-label">Owner mode</span>
+                        <span class="owner-mode-meta">Unlimited searches unlocked</span>
+                    </div>
+                </div>
+
+                <div class="cta-button-row">
+                    <a href="signup.html" class="primary-cta">Sign Up</a>
+                    <a href="login.html" class="ghost-cta">Log In</a>
+                </div>
+            </div>
+
+            <div class="header-content">
+                <h1>Vending Machine Location Finder</h1>
+                <p class="subtitle">Find optimal locations for your vending machine business</p>
+            </div>
+        </header>
+
+        <div class="search-section">
+            <form id="searchForm" class="search-box" novalidate>
+                <input 
+                    type="text" 
+                    id="locationInput" 
+                    placeholder="Enter zip code, area code, city, or state..."
+                    autocomplete="off"
+                    required
+                >
+                <input
+                    type="email"
+                    id="searchEmailInput"
+                    placeholder="Email (optional - sign up for 5 free searches)"
+                    autocomplete="email"
+                >
+                <button id="searchBtn" class="search-btn" type="button">
+                    <span>Search</span>
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                </button>
+            </form>
+            <div class="search-options">
+                <label>
+                    <input type="checkbox" id="highTrafficOnly" checked>
+                    High traffic areas only
+                </label>
+                <label>
+                    <input type="checkbox" id="excludeExisting" checked>
+                    Exclude areas with existing vending machines
+                </label>
+                <button id="advancedFiltersToggle" class="advanced-filters-btn" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                    </svg>
+                    Advanced Filters
+                    <span id="filterBadge" class="filter-badge hidden">0</span>
+                </button>
+            </div>
+            
+            <div id="advancedFiltersPanel" class="advanced-filters-panel hidden">
+                <h3>Advanced Filters</h3>
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label for="filterMinScore">Minimum Overall Score</label>
+                        <input type="number" id="filterMinScore" min="0" max="100" step="5" placeholder="0">
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterMaxDistance">Max Distance (km)</label>
+                        <input type="number" id="filterMaxDistance" min="0" step="1" placeholder="No limit">
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterMinVisitors">Min Daily Visitors</label>
+                        <input type="number" id="filterMinVisitors" min="0" step="100" placeholder="0">
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterMaxVisitors">Max Daily Visitors</label>
+                        <input type="number" id="filterMaxVisitors" min="0" step="100" placeholder="No limit">
+                    </div>
+                </div>
+                <div class="filter-categories">
+                    <label>Location Categories</label>
+                    <div class="category-checkboxes">
+                        <label><input type="checkbox" name="filterCategory" value="airport"> Airport</label>
+                        <label><input type="checkbox" name="filterCategory" value="hospital"> Hospital</label>
+                        <label><input type="checkbox" name="filterCategory" value="university"> University</label>
+                        <label><input type="checkbox" name="filterCategory" value="shopping_mall"> Shopping Mall</label>
+                        <label><input type="checkbox" name="filterCategory" value="gym"> Gym</label>
+                        <label><input type="checkbox" name="filterCategory" value="office"> Office</label>
+                        <label><input type="checkbox" name="filterCategory" value="school"> School</label>
+                        <label><input type="checkbox" name="filterCategory" value="train_station"> Train Station</label>
+                        <label><input type="checkbox" name="filterCategory" value="supermarket"> Supermarket</label>
+                    </div>
+                </div>
+                <div class="filter-actions">
+                    <button id="applyFiltersBtn" class="primary-btn" type="button">Apply Filters</button>
+                    <button id="resetFiltersBtn" class="ghost-btn" type="button">Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="usageIndicator" class="usage-indicator hidden">
+            <span id="usageText"></span>
+        </div>
+        
+        <div class="home-highlights">
+            <!-- Features Hero Section -->
+            <section class="features-hero scroll-reveal">
+                <h2>Find Vending Machine Spots That Actually Make Money</h2>
+                <p class="features-hero-intro">We've built a tool that looks at tons of data to help you find the best spots for your vending machines. No guesswork, no wasted trips—just real locations where people actually want to buy snacks and drinks. Here's how we help you find the perfect spots.</p>
+            </section>
+
+            <!-- Smart Location Scoring -->
+            <section class="feature-section scroll-reveal" data-sticky="true" data-sticky-threshold="0.1">
+                <div class="feature-section-content">
+                    <div class="feature-icon" data-parallax-speed="0.3">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                            <path d="M2 17l10 5 10-5"></path>
+                            <path d="M2 12l10 5 10-5"></path>
+                        </svg>
+                    </div>
+                    <div class="feature-text">
+                        <h3>How We Score Each Location</h3>
+                        <p>Every location gets a score from 0 to 100. We look at how many people walk by, what kind of place it is, whether there's already competition, and what other businesses are nearby. If a spot scores above 70, it's usually a winner—lots of foot traffic and not too many other machines around.</p>
+                        <ul class="feature-benefits">
+                            <li>Overall Score: One number that tells you if a spot is worth your time</li>
+                            <li>Foot Traffic Score: How many people actually walk by each day</li>
+                            <li>Competition Check: We'll tell you if there's already a machine there</li>
+                            <li>Nearby Businesses: Extra points if there are other busy places close by</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Traffic Pattern Analysis -->
+            <section class="feature-section scroll-reveal" data-sticky="true" data-sticky-threshold="0.1">
+                <div class="feature-section-content reverse">
+                    <div class="feature-icon" data-parallax-speed="0.3">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 20V10"></path>
+                            <path d="M12 20V4"></path>
+                            <path d="M6 20v-6"></path>
+                        </svg>
+                    </div>
+                    <div class="feature-text">
+                        <h3>See Who's Actually Walking By</h3>
+                        <p>Want to know who's going to buy from your machine? We'll show you how many people visit each spot, when they're busiest, and what age groups you're dealing with. This way you can stock the right products before you even set up shop.</p>
+                        <ul class="feature-benefits">
+                            <li>Daily Visitors: How many people actually come through each day</li>
+                            <li>Busiest Times: When the crowds show up (so you know when to restock)</li>
+                            <li>Who's There: Age breakdowns so you know if you should stock energy drinks or coffee</li>
+                            <li>Why It's Busy: We explain what makes a location popular</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Competition Detection -->
+            <section class="feature-section scroll-reveal" data-sticky="true" data-sticky-threshold="0.1">
+                <div class="feature-section-content">
+                    <div class="feature-icon" data-parallax-speed="0.3">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 11l3 3L22 4"></path>
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"></path>
+                        </svg>
+                    </div>
+                    <div class="feature-text">
+                        <h3>Check If Someone Already Beat You There</h3>
+                        <p>Nothing worse than showing up to a spot and finding out there's already a machine there. We check for existing machines and tell you if an area is too crowded or if there's still room for you. Find the spots where people want snacks but nobody's selling them yet.</p>
+                        <ul class="feature-benefits">
+                            <li>Competition Check: We'll tell you right away if there's already a machine</li>
+                            <li>How Crowded: Is the area packed with machines or wide open?</li>
+                            <li>Your Chances: See if you can compete or if you should look elsewhere</li>
+                            <li>Untapped Spots: Find places where people want snacks but can't get them</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Advanced Search & Filtering -->
+            <section class="feature-section scroll-reveal" data-sticky="true" data-sticky-threshold="0.1">
+                <div class="feature-section-content reverse">
+                    <div class="feature-icon" data-parallax-speed="0.3">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                        </svg>
+                    </div>
+                    <div class="feature-text">
+                        <h3>Search Exactly What You Want</h3>
+                        <p>Type in a zip code, city, or state and we'll find spots for you. Then use our filters to narrow it down—only show busy places, skip spots with competition, or focus on specific types like gyms or hospitals. Save yourself hours of driving around looking for the perfect spot.</p>
+                        <ul class="feature-benefits">
+                            <li>Busy Places Only: Filter to show just the high-traffic spots</li>
+                            <li>No Competition: Skip anywhere that already has a machine</li>
+                            <li>Pick Your Type: Hospitals, gyms, airports, schools—whatever you're looking for</li>
+                            <li>Quality Control: Only show locations that score above a certain number</li>
+                            <li>Stay Close: Find spots within a certain distance from where you are</li>
+                            <li>Traffic Requirements: Set how many daily visitors you need</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Interactive Maps -->
+            <section class="feature-section scroll-reveal" data-sticky="true" data-sticky-threshold="0.1">
+                <div class="feature-section-content">
+                    <div class="feature-icon" data-parallax-speed="0.3">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                    </div>
+                    <div class="feature-text">
+                        <h3>See Every Spot on a Map</h3>
+                        <p>All your potential locations show up on a map you can zoom around and explore. Click any spot to see the details, and even check out what it actually looks like with Street View—no need to drive there first to see if it's worth it.</p>
+                        <ul class="feature-benefits">
+                            <li>Interactive Map: Zoom in, move around, see everything at once</li>
+                            <li>Color Coding: The best spots stand out immediately</li>
+                            <li>Street View: See what the place actually looks like before you go</li>
+                            <li>All the Info: Click any spot to see everything we know about it</li>
+                            <li>See the Distance: Understand how far apart different spots are</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Financial Analysis -->
+            <section class="feature-section scroll-reveal" data-sticky="true" data-sticky-threshold="0.1">
+                <div class="feature-section-content reverse">
+                    <div class="feature-icon" data-parallax-speed="0.3">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="2" x2="12" y2="22"></line>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                    </div>
+                    <div class="feature-text">
+                        <h3>Figure Out If It's Actually Worth It</h3>
+                        <p>Before you drop money on a machine, use our calculator to see if you'll make it back. We'll show you how much you might make, when you'll break even, and what your profits could look like over time. Plug in your numbers and see if the math works out.</p>
+                        <ul class="feature-benefits">
+                            <li>Revenue Guesses: Best case, worst case, and most likely scenarios</li>
+                            <li>Break Even: When you'll finally make back what you spent</li>
+                            <li>Long Term Numbers: See how it looks after 1, 3, or 5 years</li>
+                            <li>Monthly Breakdown: See your cash flow month by month</li>
+                            <li>Your Numbers: Put in your machine cost, rent, and other expenses</li>
+                            <li>5-Year Picture: Total money made, total profit, and monthly averages</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Revenue Predictions -->
+            <section class="feature-section scroll-reveal" data-sticky="true" data-sticky-threshold="0.1">
+                <div class="feature-section-content">
+                    <div class="feature-icon" data-parallax-speed="0.3">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="2" x2="12" y2="22"></line>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                    </div>
+                    <div class="feature-text">
+                        <h3>How Much Money You Could Actually Make</h3>
+                        <p>We'll give you three different revenue estimates—the safe bet, the realistic one, and the dream scenario. Each location gets its own numbers based on how busy it is and what kind of place it is. Plan for the worst, hope for the best.</p>
+                        <ul class="feature-benefits">
+                            <li>Three Scenarios: Best case, worst case, and most likely</li>
+                            <li>Custom to Each Spot: Every location gets numbers that make sense for it</li>
+                            <li>Yearly Totals: See what you could make in a full year</li>
+                            <li>What Matters: We explain what makes one spot better than another</li>
+                            <li>Compare to Others: See how your spot stacks up against typical locations</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Comparison Tools -->
+            <section class="feature-section scroll-reveal" data-sticky="true" data-sticky-threshold="0.1">
+                <div class="feature-section-content reverse">
+                    <div class="feature-icon" data-parallax-speed="0.3">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                        </svg>
+                    </div>
+                    <div class="feature-text">
+                        <h3>Compare Spots Side by Side</h3>
+                        <p>Can't decide between a few locations? Put them next to each other and see how they stack up. We'll show you the scores, traffic numbers, and what's good or bad about each one. We'll even tell you which one's best for making money, which has the most traffic, or which has the most potential.</p>
+                        <ul class="feature-benefits">
+                            <li>See Them Together: Look at multiple spots at the same time</li>
+                            <li>Compare Everything: Scores, traffic, distance—all in one place</li>
+                            <li>Good and Bad: What works and what doesn't for each spot</li>
+                            <li>Our Pick: We'll tell you which one's best for what you want</li>
+                            <li>Save It: Export your comparison so you can look at it later</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Export & Data Management -->
+            <section class="feature-section scroll-reveal" data-sticky="true" data-sticky-threshold="0.1">
+                <div class="feature-section-content">
+                    <div class="feature-icon" data-parallax-speed="0.3">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </div>
+                    <div class="feature-text">
+                        <h3>Take Your Data With You</h3>
+                        <p>Found some great spots? Export everything so you can use it in spreadsheets, show it to partners, or just keep it for your records. All the info about each location comes with it.</p>
+                        <ul class="feature-benefits">
+                            <li>JSON Format: For developers or if you want to build something with it</li>
+                            <li>CSV Format: Open it in Excel or Google Sheets</li>
+                            <li>PDF Reports: Make it look nice for presentations or your records</li>
+                            <li>Everything Included: All the scores, traffic numbers, and details</li>
+                            <li>Export Multiple: Grab data for all your favorite spots at once</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Saved Locations -->
+            <section class="feature-section scroll-reveal" data-sticky="true" data-sticky-threshold="0.1">
+                <div class="feature-section-content reverse">
+                    <div class="feature-icon" data-parallax-speed="0.3">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="feature-text">
+                        <h3>Save Your Favorite Spots</h3>
+                        <p>Found a spot you like? Save it so you can come back to it later. Organize them into folders, add notes about what you liked, and tag them however makes sense to you. Build your own list of potential locations.</p>
+                        <ul class="feature-benefits">
+                            <li>Bookmark Spots: Save locations you want to remember</li>
+                            <li>Organize: Put them in folders so you can find them later</li>
+                            <li>Add Notes: Write down why you liked a spot or what to remember</li>
+                            <li>Quick Access: Get back to your saved spots anytime</li>
+                            <li>Keep Track: Remember which spots you've already checked out</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Product Recommendations -->
+            <section class="feature-section scroll-reveal" data-sticky="true" data-sticky-threshold="0.1">
+                <div class="feature-section-content">
+                    <div class="feature-icon" data-parallax-speed="0.3">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                    </div>
+                    <div class="feature-text">
+                        <h3>What Should You Actually Stock?</h3>
+                        <p>Not sure what to put in your machine? We'll suggest products based on who's actually walking by. If it's a gym, maybe protein bars. If it's an office, maybe coffee. We'll tell you what's likely to sell based on the location.</p>
+                        <ul class="feature-benefits">
+                            <li>Custom Suggestions: Different recommendations for each spot</li>
+                            <li>Match the Crowd: Products that fit the age group walking by</li>
+                            <li>Traffic Matters: Different suggestions for busy vs. quiet spots</li>
+                            <li>What Sells: See which product types do best at each location</li>
+                            <li>Money Potential: How much each product category could make</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Competitive Intelligence -->
+            <section class="feature-section scroll-reveal" data-sticky="true" data-sticky-threshold="0.1">
+                <div class="feature-section-content reverse">
+                    <div class="feature-icon" data-parallax-speed="0.3">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                    </div>
+                    <div class="feature-text">
+                        <h3>See What You're Up Against</h3>
+                        <p>Want to know if an area is too crowded with machines or if there's still room for you? We'll show you how saturated the market is, where you stand compared to others, and what opportunities are still out there.</p>
+                        <ul class="feature-benefits">
+                            <li>How Crowded: Is the area packed or wide open?</li>
+                            <li>Your Position: See how you compare to what's already there</li>
+                            <li>What's Missing: Find gaps where people want something but can't get it</li>
+                            <li>How to Win: Get tips on competing in that area</li>
+                            <li>Bigger Picture: Understand what's happening in the market overall</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Call to Action -->
+            <section class="features-cta scroll-reveal">
+                <h2>Ready to Find Some Great Spots?</h2>
+                <p>Stop guessing and start finding real locations that actually work. Type in an area and let us show you where people are ready to buy. No more wasted trips or bad locations—just spots that make sense.</p>
+                <div class="cta-buttons">
+                    <button id="startSearchFromFeatures" class="primary-cta">Start Searching Now</button>
+                </div>
+            </section>
+        </div>
+
+        <div id="loadingIndicator" class="loading hidden">
+            <div class="spinner"></div>
+            <p>Analyzing locations...</p>
+        </div>
+
+        <div id="resultsSection" class="results-section hidden">
+            <div class="results-header">
+                <div class="results-header-left">
+                    <h2>Best Locations Found</h2>
+                    <div class="results-count">
+                        <span id="resultsCount">0</span> locations analyzed
+                    </div>
+                </div>
+                <div class="results-header-right">
+                    <button id="exportToggle" class="export-link" type="button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Export
+                    </button>
+                    <a href="comparison.html" id="compareLocationsBtn" class="compare-link">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                        </svg>
+                        Compare Locations
+                        <span id="comparisonBadge" class="comparison-badge hidden">0</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div id="exportPanel" class="export-panel hidden">
+                <h3>Export Locations</h3>
+                <p class="export-description">Choose a format to export your location data</p>
+                <div class="export-options">
+                    <button id="exportJSONBtn" class="export-option-btn" type="button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 7h16M4 12h16M4 17h16"></path>
+                        </svg>
+                        <span>JSON</span>
+                        <small>Structured data format</small>
+                    </button>
+                    <button id="exportCSVBtn" class="export-option-btn" type="button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        <span>CSV</span>
+                        <small>Spreadsheet format</small>
+                    </button>
+                    <button id="exportPDFBtn" class="export-option-btn" type="button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        <span>PDF/HTML</span>
+                        <small>Printable report</small>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="results-container">
+                <div id="mapContainer" class="map-container"></div>
+                <div id="resultsList" class="results-list"></div>
+            </div>
+            <!-- Backdrop overlay for location detail panel -->
+            <div id="locationDetailBackdrop" class="location-detail-backdrop"></div>
+            
+            <!-- Enhanced Location Detail Slide-out Panel -->
+            <div id="locationDetailPanel" class="location-detail-panel hidden" aria-live="polite" aria-hidden="true">
+                <button class="detail-panel-close" id="closePanelBtn" type="button" aria-label="Close panel">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"></path>
+                    </svg>
+                </button>
+                
+                <div class="detail-panel-content">
+                    <!-- Header Section -->
+                    <div class="detail-panel-header">
+                        <span class="detail-category-badge" id="detailCategoryBadge">Location</span>
+                        <h2 id="detailLocationName">Select a location</h2>
+                        <p id="detailLocationAddress" class="detail-address-text">
+                            Click any result card or map marker to view details
+                        </p>
+                        <div class="detail-score-row">
+                            <div class="detail-score">
+                                <span class="score-value" id="detailOverallScore">—</span>
+                                <span class="score-label">Overall Score</span>
+                            </div>
+                            <div class="detail-score">
+                                <span class="score-value" id="detailFootTrafficScore">—</span>
+                                <span class="score-label">Traffic Score</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Street View Section -->
+                    <div class="detail-section">
+                        <h3 class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="section-icon">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                            Street View
+                        </h3>
+                        <div class="street-view-container" id="streetViewContainer">
+                            <div class="street-view-placeholder">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                                </svg>
+                                <p>Select a location to view</p>
+                            </div>
+                            <iframe id="streetViewFrame" class="street-view-frame hidden" allowfullscreen loading="lazy"></iframe>
+                        </div>
+                        <a id="streetViewLink" href="#" target="_blank" rel="noopener" class="street-view-link hidden">
+                            Open full Street View ↗
+                        </a>
+                    </div>
+
+                    <!-- Vending Machine Status -->
+                    <div class="detail-section">
+                        <h3 class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="section-icon">
+                                <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                                <line x1="8" y1="6" x2="16" y2="6"></line>
+                                <line x1="8" y1="10" x2="16" y2="10"></line>
+                                <line x1="8" y1="14" x2="12" y2="14"></line>
+                            </svg>
+                            Vending Machine Status
+                        </h3>
+                        <div class="vending-status-card" id="vendingStatusCard">
+                            <div class="vending-status-indicator" id="vendingStatusIndicator">
+                                <span class="status-dot"></span>
+                                <span class="status-text" id="vendingStatusText">Checking...</span>
+                            </div>
+                            <p class="vending-status-detail" id="vendingStatusDetail">
+                                Loading competition analysis...
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Owner / Operator Section -->
+                    <div class="detail-section">
+                        <h3 class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="section-icon">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            Owner / Operator
+                        </h3>
+                        <div class="owner-card">
+                            <div class="owner-name" id="detailOwnerName">—</div>
+                            <div class="owner-contacts" id="detailOwnerContacts">
+                                <p class="no-contacts">No contact information available</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Daily Traffic & Demographics -->
+                    <div class="detail-section">
+                        <h3 class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="section-icon">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                            Daily Traffic & Demographics
+                        </h3>
+                        <div class="traffic-card">
+                            <div class="traffic-headline">
+                                <span class="traffic-number" id="detailDailyVisitors">—</span>
+                                <span class="traffic-label">estimated daily visitors</span>
+                            </div>
+                            <p class="traffic-explanation" id="detailTrafficExplanation">
+                                Select a location to see traffic analysis.
+                            </p>
+                        </div>
+                        
+                        <div class="demographics-card">
+                            <h4>Age Demographics</h4>
+                            <div class="age-breakdown" id="ageBreakdown">
+                                <div class="age-bar">
+                                    <span class="age-label">18-24</span>
+                                    <div class="age-bar-track"><div class="age-bar-fill" data-age="18-24"></div></div>
+                                    <span class="age-percent" data-age="18-24">—</span>
+                                </div>
+                                <div class="age-bar">
+                                    <span class="age-label">25-34</span>
+                                    <div class="age-bar-track"><div class="age-bar-fill" data-age="25-34"></div></div>
+                                    <span class="age-percent" data-age="25-34">—</span>
+                                </div>
+                                <div class="age-bar">
+                                    <span class="age-label">35-44</span>
+                                    <div class="age-bar-track"><div class="age-bar-fill" data-age="35-44"></div></div>
+                                    <span class="age-percent" data-age="35-44">—</span>
+                                </div>
+                                <div class="age-bar">
+                                    <span class="age-label">45-54</span>
+                                    <div class="age-bar-track"><div class="age-bar-fill" data-age="45-54"></div></div>
+                                    <span class="age-percent" data-age="45-54">—</span>
+                                </div>
+                                <div class="age-bar">
+                                    <span class="age-label">55+</span>
+                                    <div class="age-bar-track"><div class="age-bar-fill" data-age="55+"></div></div>
+                                    <span class="age-percent" data-age="55+">—</span>
+                                </div>
+                            </div>
+                            <p class="demographics-note" id="demographicsNote">Demographics estimated based on location type.</p>
+                        </div>
+                    </div>
+
+                    <!-- Location Description -->
+                    <div class="detail-section">
+                        <h3 class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="section-icon">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                            About This Location
+                        </h3>
+                        <div class="description-card">
+                            <p id="detailDescription" class="location-description">
+                                Select a location to see a detailed breakdown of why it's a good fit for vending.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Revenue Predictions -->
+                    <div class="detail-section">
+                        <h3 class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="section-icon">
+                                <line x1="12" y1="2" x2="12" y2="22"></line>
+                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                            </svg>
+                            Revenue Predictions
+                        </h3>
+                        <div id="revenuePredictions" class="revenue-predictions-card">
+                            <p class="text-muted">Select a location to see revenue predictions</p>
+                        </div>
+                    </div>
+
+                    <!-- Product Recommendations -->
+                    <div class="detail-section">
+                        <h3 class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="section-icon">
+                                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                                <line x1="3" y1="6" x2="21" y2="6"></line>
+                                <path d="M16 10a4 4 0 0 1-8 0"></path>
+                            </svg>
+                            Recommended Products
+                        </h3>
+                        <div id="productRecommendations" class="product-recommendations-card">
+                            <p class="text-muted">Select a location to see product recommendations</p>
+                        </div>
+                    </div>
+
+                    <!-- Competitive Intelligence -->
+                    <div class="detail-section">
+                        <h3 class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="section-icon">
+                                <path d="M9 11l3 3L22 4"></path>
+                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"></path>
+                            </svg>
+                            Competitive Intelligence
+                        </h3>
+                        <div id="competitiveAnalysis" class="competitive-analysis-card">
+                            <p class="text-muted">Select a location to see competitive analysis</p>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="detail-section">
+                        <h3 class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="section-icon">
+                                <line x1="18" y1="20" x2="18" y2="10"></line>
+                                <line x1="12" y1="20" x2="12" y2="4"></line>
+                                <line x1="6" y1="20" x2="6" y2="14"></line>
+                            </svg>
+                            Quick Stats
+                        </h3>
+                        <div class="quick-stats-grid">
+                            <div class="quick-stat">
+                                <span class="stat-value" id="detailDistance">—</span>
+                                <span class="stat-label">from center</span>
+                            </div>
+                            <div class="quick-stat">
+                                <span class="stat-value" id="detailNearbyCount">—</span>
+                                <span class="stat-label">nearby anchors</span>
+                            </div>
+                            <div class="quick-stat">
+                                <span class="stat-value" id="detailPeakHours">—</span>
+                                <span class="stat-label">peak hours</span>
+                            </div>
+                            <div class="quick-stat">
+                                <span class="stat-value" id="detailBestProducts">—</span>
+                                <span class="stat-label">best products</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Save Location -->
+                    <div class="detail-section">
+                        <h3 class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="section-icon">
+                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            Save Location
+                            <button id="saveLocationToggle" class="section-toggle-btn" type="button" aria-label="Toggle Save Location">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </button>
+                        </h3>
+                        <div id="saveLocationPanel" class="save-location-panel hidden">
+                            <div id="saveLocationStatus" class="save-location-status"></div>
+                            <div class="save-location-form">
+                                <div class="save-input-group">
+                                    <label for="saveLocationFolder">Folder</label>
+                                    <select id="saveLocationFolder" class="save-input">
+                                        <option value="default">Default</option>
+                                    </select>
+                                </div>
+                                <div class="save-input-group">
+                                    <label for="saveLocationNotes">Notes</label>
+                                    <textarea id="saveLocationNotes" class="save-input" rows="3" placeholder="Add notes about this location..."></textarea>
+                                </div>
+                                <div class="save-input-group">
+                                    <label for="saveLocationTags">Tags (comma-separated)</label>
+                                    <input type="text" id="saveLocationTags" class="save-input" placeholder="e.g., high-traffic, university, premium">
+                                </div>
+                                <div class="save-actions">
+                                    <button id="saveLocationBtn" class="primary-btn" type="button">Save Location</button>
+                                    <button id="cancelSaveBtn" class="ghost-btn" type="button">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ROI Calculator -->
+                    <div class="detail-section">
+                        <h3 class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="section-icon">
+                                <line x1="12" y1="2" x2="12" y2="22"></line>
+                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                            </svg>
+                            ROI Calculator & Financial Projections
+                            <button id="roiCalculatorToggle" class="section-toggle-btn" type="button" aria-label="Toggle ROI Calculator">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </button>
+                        </h3>
+                        <div id="roiCalculatorPanel" class="roi-calculator-panel hidden">
+                            <div class="roi-inputs-grid">
+                                <div class="roi-input-group">
+                                    <label for="roiMachineCost">Machine Cost ($)</label>
+                                    <input type="number" id="roiMachineCost" value="5000" min="0" step="100">
+                                </div>
+                                <div class="roi-input-group">
+                                    <label for="roiMonthlyLease">Monthly Lease ($)</label>
+                                    <input type="number" id="roiMonthlyLease" value="200" min="0" step="10">
+                                </div>
+                                <div class="roi-input-group">
+                                    <label for="roiMonthlyOperating">Monthly Operating Costs ($)</label>
+                                    <input type="number" id="roiMonthlyOperating" value="150" min="0" step="10">
+                                </div>
+                                <div class="roi-input-group">
+                                    <label for="roiProductMargin">Product Margin (%)</label>
+                                    <input type="number" id="roiProductMargin" value="40" min="0" max="100" step="1">
+                                </div>
+                                <div class="roi-input-group">
+                                    <label for="roiConversionRate">Conversion Rate (%)</label>
+                                    <input type="number" id="roiConversionRate" value="2" min="0" max="100" step="0.1">
+                                </div>
+                                <div class="roi-input-group">
+                                    <label for="roiAvgTransaction">Avg Transaction Value ($)</label>
+                                    <input type="number" id="roiAvgTransaction" value="2.50" min="0" step="0.10">
+                                </div>
+                            </div>
+                            <div class="roi-actions">
+                                <button id="calculateROIBtn" class="primary-btn" type="button">Calculate ROI</button>
+                                <button id="resetROIBtn" class="ghost-btn" type="button">Reset</button>
+                            </div>
+                            <div id="roiResultsSection" class="roi-results-section">
+                                <div class="roi-revenue-estimates">
+                                    <h4>Revenue Estimates (Monthly)</h4>
+                                    <div class="revenue-grid">
+                                        <div class="revenue-card conservative">
+                                            <span class="revenue-label">Conservative</span>
+                                            <span class="revenue-value" id="roiRevenueConservative">—</span>
+                                        </div>
+                                        <div class="revenue-card realistic">
+                                            <span class="revenue-label">Realistic</span>
+                                            <span class="revenue-value" id="roiRevenueRealistic">—</span>
+                                        </div>
+                                        <div class="revenue-card optimistic">
+                                            <span class="revenue-label">Optimistic</span>
+                                            <span class="revenue-value" id="roiRevenueOptimistic">—</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="roi-key-metrics">
+                                    <h4>Key Metrics</h4>
+                                    <div class="metrics-grid">
+                                        <div class="metric-item">
+                                            <span class="metric-label">Payback Period</span>
+                                            <span class="metric-value" id="roiPaybackPeriod">—</span>
+                                        </div>
+                                        <div class="metric-item">
+                                            <span class="metric-label">Break-Even Revenue</span>
+                                            <span class="metric-value" id="roiBreakEven">—</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="roi-npv-irr">
+                                    <h4>NPV & IRR</h4>
+                                    <div class="npv-irr-grid">
+                                        <div class="npv-irr-item">
+                                            <span class="period-label">1 Year</span>
+                                            <span class="npv-value">NPV: <span id="roiNPV1Year">—</span></span>
+                                            <span class="irr-value">IRR: <span id="roiIRR1Year">—</span></span>
+                                        </div>
+                                        <div class="npv-irr-item">
+                                            <span class="period-label">3 Years</span>
+                                            <span class="npv-value">NPV: <span id="roiNPV3Year">—</span></span>
+                                            <span class="irr-value">IRR: <span id="roiIRR3Year">—</span></span>
+                                        </div>
+                                        <div class="npv-irr-item">
+                                            <span class="period-label">5 Years</span>
+                                            <span class="npv-value">NPV: <span id="roiNPV5Year">—</span></span>
+                                            <span class="irr-value">IRR: <span id="roiIRR5Year">—</span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="roi-summary">
+                                    <h4>5-Year Summary</h4>
+                                    <div class="summary-grid">
+                                        <div class="summary-item">
+                                            <span class="summary-label">Total Revenue</span>
+                                            <span class="summary-value" id="roiTotalRevenue5Year">—</span>
+                                        </div>
+                                        <div class="summary-item">
+                                            <span class="summary-label">Total Profit</span>
+                                            <span class="summary-value" id="roiTotalProfit5Year">—</span>
+                                        </div>
+                                        <div class="summary-item">
+                                            <span class="summary-label">Avg Monthly Profit</span>
+                                            <span class="summary-value" id="roiAvgMonthlyProfit">—</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="roi-chart-section">
+                                    <h4>Cash Flow Chart (First 12 Months)</h4>
+                                    <div id="roiCashFlowChart" class="cash-flow-chart"></div>
+                                </div>
+                                <div class="roi-projections-section">
+                                    <h4>Monthly Projections (First Year)</h4>
+                                    <div id="roiProjectionsTable"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="errorMessage" class="error-message hidden"></div>
+    </div>
+
+    <div id="paywallOverlay" class="paywall-overlay hidden">
+        <div class="paywall-content">
+            <div class="paywall-header">
+                <h2>Unlock Full Access</h2>
+                <p>You've used your free search. Unlock unlimited access to all location data.</p>
+            </div>
+            
+            <div class="unlock-options">
+                <div class="unlock-option card-option">
+                    <h3>Unlock Full Access</h3>
+                    <p>Get unlimited searches with secure payment processing.</p>
+                    <div class="card-form">
+                        <input 
+                            type="email" 
+                            id="checkoutEmail" 
+                            placeholder="your@email.com" 
+                            class="promo-input"
+                        >
+                        <button class="card-btn" id="cardCheckoutBtn" type="button">Continue to Payment</button>
+                    </div>
+                    <small class="card-hint">Secure payment via Stripe. Use the same email to sync access across devices.</small>
+                    <div id="cardCheckoutStatus" class="card-status"></div>
+                </div>
+                
+                <div class="unlock-divider">
+                    <span>OR</span>
+                </div>
+                
+                <div class="unlock-option">
+                    <h3>Enter Promo Code</h3>
+                    <div class="promo-code-section">
+                        <input 
+                            type="text" 
+                            id="promoCodeInput" 
+                            placeholder="Enter promo code..."
+                            class="promo-input"
+                        >
+                        <button class="promo-btn" id="promoSubmitBtn" type="button">Apply</button>
+                    </div>
+                    <div id="promoStatus" class="promo-status"></div>
+                </div>
+            </div>
+            
+            <button class="close-paywall" type="button" title="Close">×</button>
+        </div>
+    </div>
+
+    <div id="blurOverlay" class="blur-overlay hidden">
+        <div class="blur-content">
+            <h3>Sign Up for 5 Free Searches</h3>
+            <p>Create an account to unlock full location details and get 5 free searches to explore premium locations.</p>
+            <div class="blur-actions">
+                <a href="signup.html" class="primary-cta">Sign Up Now</a>
+                <a href="login.html" class="ghost-cta">Log In</a>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/src/pages/home.js"></script>
+</body>
+</html>
+

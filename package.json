@@ -1,0 +1,51 @@
+{
+  "name": "vending-machine-finder",
+  "version": "1.1.0",
+  "description": "Find optimal locations for vending machines",
+  "type": "module",
+  "scripts": {
+    "start": "cross-env NODE_ENV=production node server.js",
+    "dev": "concurrently \"vite\" \"npm run server\"",
+    "dev:client": "vite",
+    "server": "cross-env NODE_ENV=development node server.js",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint \"src/**/*.js\" \"server.js\" \"lib/**/*.js\"",
+    "lint:fix": "eslint \"src/**/*.js\" \"server.js\" \"lib/**/*.js\" --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "generate-hash": "node scripts/generate-password-hash.js"
+  },
+  "keywords": [
+    "vending-machine",
+    "location-finder",
+    "business-analytics"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@vendia/serverless-express": "^4.12.6",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "jsonwebtoken": "^9.0.2",
+    "leaflet": "^1.9.4",
+    "stripe": "^14.23.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-legacy": "^5.4.0",
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.56.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-promise": "^6.1.1",
+    "vite": "^5.1.6",
+    "vitest": "^1.5.0"
+  }
+}

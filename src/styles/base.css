@@ -1,0 +1,85 @@
+:root {
+  /* Trust & Sales Boosting Color Palette */
+  /* Blue - Trust, Reliability (Primary) */
+  --gradient-start: #2563eb;
+  --gradient-end: #1e40af;
+  --accent-primary: #1e40af;
+  --accent-primary-light: #3b82f6;
+  --accent-primary-dark: #1e3a8a;
+  
+  /* Orange - Energy, Sales, Dopamine (CTAs) */
+  --accent-secondary: #f97316;
+  --accent-secondary-light: #fb923c;
+  --accent-secondary-dark: #ea580c;
+  
+  /* Green - Growth, Positive Emotions */
+  --success-color: #10b981;
+  --success-light: #34d399;
+  --success-dark: #059669;
+  
+  /* Yellow - Optimism, Attention */
+  --highlight-color: #fbbf24;
+  --highlight-light: #fcd34d;
+  
+  /* Purple - Luxury, Creativity */
+  --luxury-color: #8b5cf6;
+  
+  /* Text Colors */
+  --text-light: #ffffff;
+  --text-dark: #1e293b;
+  --text-muted: #475569;
+  --text-secondary: #64748b;
+  
+  /* Backgrounds - Light & Trustworthy */
+  --surface-card: rgba(255, 255, 255, 0.95);
+  --surface-glass: rgba(37, 99, 235, 0.08);
+  --bg-light: #f0f9ff;
+  --bg-primary: #e0f2fe;
+  
+  /* Borders */
+  --border-color: #cbd5e1;
+  --border-light: #e2e8f0;
+  
+  --radius-pill: 999px;
+  --radius-lg: 18px;
+  --radius-md: 12px;
+  --shadow-soft: 0 10px 30px rgba(37, 99, 235, 0.15);
+  --shadow-strong: 0 20px 45px rgba(37, 99, 235, 0.25);
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0f9ff 100%);
+  min-height: 100vh;
+  padding: 20px;
+  color: #1e293b;
+  line-height: 1.6;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.hidden {
+  display: none !important;
+}
+

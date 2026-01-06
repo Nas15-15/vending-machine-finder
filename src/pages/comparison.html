@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compare Locations - Vending Machine Finder</title>
+    <link rel="stylesheet" href="/src/styles/main.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body class="home-body">
+    <div class="container">
+        <header class="top-header">
+            <div class="top-nav">
+                <a href="index.html" class="back-link">← Back to Search</a>
+                <div class="cta-button-row">
+                    <a href="index.html" class="ghost-cta">Home</a>
+                </div>
+            </div>
+            <div class="header-content">
+                <h1>Compare Locations</h1>
+                <p class="subtitle">Side-by-side comparison of potential vending machine locations</p>
+            </div>
+        </header>
+
+        <div class="comparison-container">
+            <div class="comparison-controls">
+                <div class="comparison-info">
+                    <span id="comparisonCount">0</span> locations selected
+                </div>
+                <div class="comparison-actions">
+                    <button id="clearComparisonBtn" class="ghost-btn" type="button">Clear All</button>
+                    <button id="exportComparisonBtn" class="primary-btn" type="button">Export Comparison</button>
+                </div>
+            </div>
+
+            <div id="comparisonEmpty" class="comparison-empty">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <h3>No Locations to Compare</h3>
+                <p>Add locations from the search results to compare them side-by-side.</p>
+                <a href="index.html" class="primary-cta">Go to Search</a>
+            </div>
+
+            <div id="comparisonGrid" class="comparison-grid hidden">
+                <!-- Comparison cards will be inserted here -->
+            </div>
+
+            <div id="comparisonRecommendations" class="comparison-recommendations hidden">
+                <h3>Recommendations</h3>
+                <div class="recommendations-grid">
+                    <div class="recommendation-card">
+                        <h4>Best for ROI</h4>
+                        <p id="bestForROI">—</p>
+                    </div>
+                    <div class="recommendation-card">
+                        <h4>Best for Traffic</h4>
+                        <p id="bestForTraffic">—</p>
+                    </div>
+                    <div class="recommendation-card">
+                        <h4>Best for Growth</h4>
+                        <p id="bestForGrowth">—</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/src/pages/comparison.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+

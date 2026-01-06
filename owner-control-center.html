@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Monitor Insider waitlist activity, login events, and unlock history captured on this device.">
+    <title>Owner Control Center | Vending Machine Finder</title>
+    <link rel="stylesheet" href="/src/styles/main.css">
+</head>
+<body class="login-body">
+    <div class="login-shell">
+        <a class="back-link" href="login.html">← Back to login</a>
+        <section id="ownerDashboard" class="owner-dashboard" aria-live="polite">
+            <div class="owner-dashboard-header">
+                <h3>Owner Control Center</h3>
+                <p>Monitor user activity including signups, logins, searches, and upgrades with IP address and location tracking.</p>
+            </div>
+            
+            <div id="ownerNotifications" class="owner-notification-banner hidden">
+                <div class="notification-header">
+                    <h4>⚠️ Suspicious IP Activity Detected</h4>
+                    <span id="suspiciousIPCount">0</span> IP addresses have created multiple accounts
+                </div>
+                <div id="suspiciousIPList" class="suspicious-ip-list"></div>
+            </div>
+            
+            <div class="owner-panels">
+                <article class="owner-panel">
+                    <div class="owner-panel-header">
+                        <h4>Accounts Created</h4>
+                        <span class="owner-panel-meta" id="signupCount">0 total</span>
+                    </div>
+                    <div id="ownerSignups" class="owner-table">
+                        <p class="owner-empty">No waitlist submissions yet.</p>
+                    </div>
+                </article>
+                <article class="owner-panel">
+                    <div class="owner-panel-header">
+                        <h4>Logins</h4>
+                        <span class="owner-panel-meta" id="loginCount">0 recorded</span>
+                    </div>
+                    <div id="ownerLogins" class="owner-table">
+                        <p class="owner-empty">No logins captured yet.</p>
+                    </div>
+                </article>
+                <article class="owner-panel">
+                    <div class="owner-panel-header">
+                        <h4>Search Activity</h4>
+                        <span class="owner-panel-meta" id="searchCount">0 searches</span>
+                    </div>
+                    <div id="ownerSearches" class="owner-table">
+                        <p class="owner-empty">No searches recorded yet.</p>
+                    </div>
+                </article>
+                <article class="owner-panel">
+                    <div class="owner-panel-header">
+                        <h4>Subscriptions & Unlimited Access</h4>
+                        <span class="owner-panel-meta" id="upgradeCount">0 unlocks</span>
+                    </div>
+                    <div id="ownerUpgrades" class="owner-table">
+                        <p class="owner-empty">No upgrades recorded yet.</p>
+                    </div>
+                </article>
+                <article class="owner-panel">
+                    <div class="owner-panel-header">
+                        <h4>Banned Accounts</h4>
+                        <span class="owner-panel-meta" id="bannedCount">0 banned</span>
+                    </div>
+                    <div id="ownerBanned" class="owner-table">
+                        <p class="owner-empty">No banned accounts.</p>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </div>
+    <script type="module" src="/src/pages/owner.js"></script>
+</body>
+</html>
+
