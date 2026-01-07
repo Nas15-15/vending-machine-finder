@@ -3,11 +3,7 @@ import legacy from '@vitejs/plugin-legacy';
 
 const MULTI_PAGE_INPUT = {
   main: 'index.html',
-  login: 'login.html',
-  signup: 'signup.html',
-  promo: 'promo.html',
-  owner: 'owner-control-center.html',
-  paySuccess: 'pay-success.html'
+  signup: 'signup.html'
 };
 
 export default defineConfig(({ mode }) => ({
@@ -23,7 +19,6 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       input: MULTI_PAGE_INPUT
     },
-    // Copy _redirects file to dist for Netlify
     copyPublicDir: true
   },
   server: {

@@ -1,5 +1,4 @@
 import express from 'express';
-import Stripe from 'stripe';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -10,61 +9,36 @@ import bcrypt from 'bcryptjs';
 import rateLimit from 'express-rate-limit';
 
 import {
-  markPaidAccess,
   hasPaidAccess,
-  recordPromoUsage,
-  hasPromoUsage,
   addWaitlistEntry,
   recordLoginEvent,
   recordSearchEvent,
-  persistBitcoinVerification,
   grantFreeSearches,
   consumeFreeSearch,
-  grantDayAccess,
   hasActiveDayAccess,
   getCreditStatus,
   ensureWelcomeCredit,
   normalizeEmail,
-  getStoreSnapshot,
   hasAnonymousSearch,
   recordAnonymousSearch,
-  banAccount,
-  unbanAccount,
   isBanned,
-  getAllBannedAccounts,
   getAccountsByIP,
-  detectSuspiciousIPActivity,
-  recordSuspiciousIP,
-  getSuspiciousIPs,
-  acknowledgeSuspiciousIP
+  recordSuspiciousIP
 } from './lib/accessStore.js';
-import { getPromoDetails } from './lib/promoCodes.js';
-import { verifyBitcoinPayment } from './lib/bitcoin.js';
 
-const REQUIRED_CONFIRMATIONS = Number(process.env.BITCOIN_REQUIRED_CONFIRMATIONS || '1');
-const MIN_CONFIRMATIONS_FOR_UNLOCK = Math.max(1, REQUIRED_CONFIRMATIONS);
 import { runSearch } from './lib/searchService.js';
 
 dotenv.config();
 
 const requiredEnv = [
-  'STRIPE_SECRET_KEY',
-  'STRIPE_PRICE_ID',
-  'STRIPE_WEBHOOK_SECRET',
   'APP_URL',
-  'JWT_SECRET',
-  'OWNER_EMAIL',
-  'OWNER_PASSWORD_HASH'
+  'JWT_SECRET'
 ];
 
 const missing = requiredEnv.filter((key) => !process.env[key]);
 if (missing.length) {
   console.warn(`⚠️ Missing environment variables: ${missing.join(', ')}`);
 }
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2023-10-16'
-});
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -130,9 +104,7 @@ const readSession = (req) => {
 
 // Helper to extract client IP and device info
 const getClientInfo = (req) => {
-  // Netlify provides IP in x-nf-client-connection-ip header
-  const ip = req.headers['x-nf-client-connection-ip'] ||
-    req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+  const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
     req.ip ||
     req.connection?.remoteAddress ||
     'unknown';
@@ -172,91 +144,10 @@ const searchLimiter = rateLimit({
   message: 'Too many searches from this IP, please try again shortly.'
 });
 
-app.post(
-  '/api/webhooks/stripe',
-  express.raw({ type: 'application/json' }),
-  async (req, res) => {
-    const signature = req.headers['stripe-signature'];
-    let event;
-
-    try {
-      event = stripe.webhooks.constructEvent(
-        req.body,
-        signature,
-        process.env.STRIPE_WEBHOOK_SECRET || ''
-      );
-    } catch (error) {
-      console.error('Webhook signature verification failed.', error);
-      return res.status(400).send(`Webhook Error: ${error.message}`);
-    }
-
-    if (event.type === 'checkout.session.completed') {
-      const session = event.data.object;
-      if (session.payment_status === 'paid' && session.customer_email) {
-        await markPaidAccess(session.customer_email, 'stripe', { sessionId: session.id });
-      }
-    }
-
-    res.json({ received: true });
-  }
-);
-
 app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
-app.post('/api/create-checkout-session', async (req, res) => {
-  const { email } = req.body || {};
-  const normalizedEmail = normalizeEmail(email);
-  if (!normalizedEmail) {
-    return res.status(400).json({ error: 'Email is required' });
-  }
-
-  if (!stripe || !process.env.STRIPE_PRICE_ID) {
-    return res.status(500).json({ error: 'Stripe is not configured' });
-  }
-
-  try {
-    const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
-      payment_method_types: ['card'],
-      customer_email: normalizedEmail,
-      line_items: [
-        {
-          price: process.env.STRIPE_PRICE_ID,
-          quantity: 1
-        }
-      ],
-      success_url: `${process.env.APP_URL}/pay-success.html?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.APP_URL}/index.html`
-    });
-
-    res.json({ id: session.id, url: session.url });
-  } catch (error) {
-    console.error('Failed to create checkout session', error);
-    res.status(500).json({ error: 'Failed to create checkout session' });
-  }
-});
-
-app.get('/api/checkout-session', async (req, res) => {
-  const { sessionId } = req.query;
-  if (!sessionId) {
-    return res.status(400).json({ error: 'sessionId is required' });
-  }
-
-  try {
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
-    res.json({
-      id: session.id,
-      email: session.customer_email,
-      payment_status: session.payment_status
-    });
-  } catch (error) {
-    console.error('Failed to fetch checkout session', error);
-    res.status(500).json({ error: 'Failed to fetch checkout session' });
-  }
-});
 
 app.get('/api/session', (req, res) => {
   const session = readSession(req);
@@ -286,66 +177,30 @@ app.post('/api/login', async (req, res) => {
     });
   }
 
-  const ownerEmail = normalizeEmail(process.env.OWNER_EMAIL || '');
-  const ownerPasswordHash = process.env.OWNER_PASSWORD_HASH || '';
-  let role = 'member';
-  let loginMethod = 'access_code';
-
-  // Check if this is an owner login attempt
-  if (ownerEmail && normalizedEmail === ownerEmail) {
-    if (!ownerPasswordHash) {
-      console.error('Owner login attempted but OWNER_PASSWORD_HASH is not configured');
-      return res.status(500).json({ error: 'Owner authentication is not configured. Please contact support.' });
-    }
-
-    try {
-      const isOwnerValid = await bcrypt.compare(accessCode, ownerPasswordHash);
-      if (!isOwnerValid) {
-        console.log(`Owner login failed for ${normalizedEmail}: password mismatch`);
-        return res.status(401).json({ error: 'Invalid owner password' });
-      }
-      console.log(`Owner login successful for ${normalizedEmail}`);
-      role = 'owner';
-      loginMethod = 'owner';
-    } catch (error) {
-      console.error('Error validating owner password:', error);
-      return res.status(500).json({ error: 'Error validating owner credentials' });
-    }
-  } else {
-    // Log if owner email is configured but doesn't match (for debugging)
-    if (ownerEmail && process.env.NODE_ENV === 'development') {
-      console.log(`Login attempt with email ${normalizedEmail} (owner email configured: ${ownerEmail})`);
-    }
-    // Member access code validation
-    if (memberAccessCodes.length === 0) {
-      console.warn('No member access codes configured');
-    }
-
-    let matchedCode = null;
-    for (const entry of memberAccessCodes) {
-      try {
-        const match = await bcrypt.compare(accessCode, entry.hash);
-        if (match) {
-          matchedCode = entry;
-          break;
-        }
-      } catch (error) {
-        console.error('Error comparing access code:', error);
-        continue;
-      }
-    }
-
-    if (!matchedCode) {
-      // Provide more helpful error message
-      let errorMsg = 'Invalid access code';
-      if (ownerEmail) {
-        errorMsg += '. If you are the owner, make sure you are using the exact email: ' + ownerEmail;
-      }
-      return res.status(401).json({ error: errorMsg });
-    }
-    await markPaidAccess(normalizedEmail, 'access_code', { label: matchedCode.label });
+  // Member access code validation
+  if (memberAccessCodes.length === 0) {
+    console.warn('No member access codes configured');
   }
 
+  let matchedCode = null;
+  for (const entry of memberAccessCodes) {
+    try {
+      const match = await bcrypt.compare(accessCode, entry.hash);
+      if (match) {
+        matchedCode = entry;
+        break;
+      }
+    } catch (error) {
+      console.error('Error comparing access code:', error);
+      continue;
+    }
+  }
+
+  if (!matchedCode) {
+    return res.status(401).json({ error: 'Invalid access code' });
+  }
+
+  const role = 'member';
   const token = createToken({ email: normalizedEmail, role });
   res.cookie('vmf_session', token, cookieOptions);
   const clientInfo = getClientInfo(req);
@@ -353,7 +208,7 @@ app.post('/api/login', async (req, res) => {
   await recordLoginEvent({
     email: normalizedEmail,
     role,
-    method: loginMethod,
+    method: 'access_code',
     ...clientInfo,
     ...location
   });
@@ -367,43 +222,6 @@ app.post('/api/logout', (req, res) => {
     maxAge: 0
   });
   res.json({ ok: true });
-});
-
-app.post('/api/promo/redeem', async (req, res) => {
-  const { email, code } = req.body || {};
-  const normalizedEmail = normalizeEmail(email);
-  if (!normalizedEmail || !code) {
-    return res.status(400).json({ error: 'Email and promo code are required' });
-  }
-  const promoDetails = getPromoDetails(code);
-  if (!promoDetails) {
-    return res.status(404).json({ error: 'Promo code not found' });
-  }
-  const alreadyUsed = await hasPromoUsage(normalizedEmail, code);
-  if (alreadyUsed) {
-    return res.status(409).json({ error: 'Promo code already used for this email' });
-  }
-
-  switch (promoDetails.type) {
-    case 'full_access':
-      await markPaidAccess(normalizedEmail, 'promo', { code });
-      break;
-    case 'free_search':
-      await grantFreeSearches(normalizedEmail, promoDetails.bonusSearches || 1);
-      break;
-    case 'day_access':
-      await grantDayAccess(normalizedEmail, promoDetails.durationHours || 24);
-      break;
-    default:
-      break;
-  }
-  await recordPromoUsage(normalizedEmail, code);
-
-  res.json({
-    success: true,
-    type: promoDetails.type,
-    message: promoDetails.successMessage || 'Promo applied.'
-  });
 });
 
 app.post('/api/waitlist', async (req, res) => {
@@ -460,190 +278,6 @@ app.post('/api/waitlist', async (req, res) => {
   res.json({ success: true, freeSearchesGranted: 25, email: normalizedEmail, role });
 });
 
-app.get('/api/owner/overview', async (req, res) => {
-  const session = readSession(req);
-  if (!session || session.role !== 'owner') {
-    return res.status(403).json({ error: 'Owner access required' });
-  }
-  const snapshot = await getStoreSnapshot();
-  const waitlist = snapshot.waitlist.slice(-200).reverse();
-  const logins = snapshot.loginEvents.slice(-200).reverse();
-  const upgrades = Object.values(snapshot.paid || {}).slice(-200).reverse();
-  const searches = (snapshot.searchEvents || []).slice(-200).reverse();
-
-  // Check for suspicious IPs and include in response
-  const suspiciousIPs = await getSuspiciousIPs(false);
-
-  res.json({ waitlist, logins, upgrades, searches, suspiciousIPs });
-});
-
-app.post('/api/owner/ban', async (req, res) => {
-  const session = readSession(req);
-  if (!session || session.role !== 'owner') {
-    return res.status(403).json({ error: 'Owner access required' });
-  }
-  const { email, reason } = req.body || {};
-  const normalizedEmail = normalizeEmail(email);
-  if (!normalizedEmail) {
-    return res.status(400).json({ error: 'Email is required' });
-  }
-  const banned = await banAccount(normalizedEmail, reason || '');
-  res.json({ success: true, banned });
-});
-
-app.post('/api/owner/unban', async (req, res) => {
-  const session = readSession(req);
-  if (!session || session.role !== 'owner') {
-    return res.status(403).json({ error: 'Owner access required' });
-  }
-  const { email } = req.body || {};
-  const normalizedEmail = normalizeEmail(email);
-  if (!normalizedEmail) {
-    return res.status(400).json({ error: 'Email is required' });
-  }
-  const unbanned = await unbanAccount(normalizedEmail);
-  res.json({ success: unbanned });
-});
-
-app.get('/api/owner/banned', async (req, res) => {
-  const session = readSession(req);
-  if (!session || session.role !== 'owner') {
-    return res.status(403).json({ error: 'Owner access required' });
-  }
-  const banned = await getAllBannedAccounts();
-  res.json({ banned });
-});
-
-app.get('/api/owner/suspicious-ips', async (req, res) => {
-  const session = readSession(req);
-  if (!session || session.role !== 'owner') {
-    return res.status(403).json({ error: 'Owner access required' });
-  }
-  const suspicious = await detectSuspiciousIPActivity(3);
-  res.json({ suspiciousIPs: suspicious });
-});
-
-app.get('/api/owner/notifications', async (req, res) => {
-  const session = readSession(req);
-  if (!session || session.role !== 'owner') {
-    return res.status(403).json({ error: 'Owner access required' });
-  }
-  const suspiciousIPs = await getSuspiciousIPs(false);
-  res.json({
-    suspiciousIPCount: suspiciousIPs.length,
-    suspiciousIPs: suspiciousIPs.slice(0, 10) // Return top 10
-  });
-});
-
-app.post('/api/owner/acknowledge-suspicious-ip', async (req, res) => {
-  const session = readSession(req);
-  if (!session || session.role !== 'owner') {
-    return res.status(403).json({ error: 'Owner access required' });
-  }
-  const { ip } = req.body || {};
-  if (!ip) {
-    return res.status(400).json({ error: 'IP address is required' });
-  }
-  const acknowledged = await acknowledgeSuspiciousIP(ip);
-  res.json({ success: acknowledged });
-});
-
-app.post('/api/bitcoin/verify', async (req, res) => {
-  const { txId, email } = req.body || {};
-  const normalizedEmail = normalizeEmail(email);
-  if (!normalizedEmail || !txId) {
-    return res.status(400).json({ error: 'Email and transaction ID are required' });
-  }
-
-  const address = process.env.BITCOIN_ADDRESS;
-  const minSats = Number(process.env.BITCOIN_MIN_SATS || 0);
-  if (!address || !minSats) {
-    return res.status(500).json({ error: 'Bitcoin payments are not configured' });
-  }
-
-  try {
-    const result = await verifyBitcoinPayment({ txId, address, minSats });
-    await persistBitcoinVerification(txId, result);
-
-    if (!result.meetsThreshold) {
-      return res.status(400).json({
-        error: 'Payment amount does not match requirements',
-        totalSats: result.totalSats,
-        requiredSats: minSats
-      });
-    }
-
-    if (!result.confirmed) {
-      return res.status(202).json({
-        pending: true,
-        confirmations: result.confirmations,
-        requiredConfirmations: MIN_CONFIRMATIONS_FOR_UNLOCK,
-        message: `Awaiting confirmations (${result.confirmations}/${MIN_CONFIRMATIONS_FOR_UNLOCK})`
-      });
-    }
-
-    await markPaidAccess(normalizedEmail, 'bitcoin', {
-      txId,
-      confirmations: result.confirmations,
-      totalSats: result.totalSats
-    });
-    res.json({ success: true, confirmations: result.confirmations });
-  } catch (error) {
-    console.error('Bitcoin verification failed', error);
-    res.status(500).json({ error: `Unable to verify Bitcoin payment: ${error.message}` });
-  }
-});
-
-app.get('/api/bitcoin/status', async (req, res) => {
-  const { txId, email } = req.query || {};
-  const normalizedEmail = normalizeEmail(email);
-  if (!normalizedEmail || !txId) {
-    return res.status(400).json({ error: 'Email and transaction ID are required' });
-  }
-
-  const store = await getStoreSnapshot();
-  const verification = store.bitcoinVerifications?.[txId];
-  if (verification) {
-    const hasAccess = await hasPaidAccess(normalizedEmail);
-    return res.json({
-      txId,
-      verified: verification.confirmed && verification.meetsThreshold,
-      confirmations: verification.confirmations || 0,
-      hasAccess
-    });
-  }
-
-  const address = process.env.BITCOIN_ADDRESS;
-  const minSats = Number(process.env.BITCOIN_MIN_SATS || 0);
-  if (!address || !minSats) {
-    return res.status(500).json({ error: 'Bitcoin payments are not configured' });
-  }
-
-  try {
-    const result = await verifyBitcoinPayment({ txId, address, minSats });
-    await persistBitcoinVerification(txId, result);
-
-    if (result.confirmed && result.meetsThreshold) {
-      await markPaidAccess(normalizedEmail, 'bitcoin', {
-        txId,
-        confirmations: result.confirmations,
-        totalSats: result.totalSats
-      });
-    }
-
-    res.json({
-      txId,
-      verified: result.confirmed && result.meetsThreshold,
-      confirmations: result.confirmations,
-      meetsThreshold: result.meetsThreshold,
-      hasAccess: result.confirmed && result.meetsThreshold
-    });
-  } catch (error) {
-    console.error('Bitcoin status check failed', error);
-    res.status(500).json({ error: `Unable to check Bitcoin payment status: ${error.message}` });
-  }
-});
-
 app.get('/api/access-status', async (req, res) => {
   const session = readSession(req);
   const queryEmail = normalizeEmail(req.query.email || '');
@@ -659,16 +293,12 @@ app.get('/api/access-status', async (req, res) => {
     getCreditStatus(targetEmail)
   ]);
 
-  const hasAccess = Boolean(
-    session?.role === 'owner' ||
-    paidAccess ||
-    dayAccess
-  );
+  // App is now free - everyone has access
+  const hasAccess = true;
 
   res.json({
     email: targetEmail,
     hasAccess,
-    owner: session?.role === 'owner',
     dayAccessExpiry: credits.dayAccessExpiry || 0,
     freeSearchesRemaining: credits.freeSearches || 0
   });
@@ -728,7 +358,7 @@ app.post('/api/search', searchLimiter, async (req, res) => {
     if (hasUsedAnonymous) {
       // Already used anonymous search, require signup
       return res.status(402).json({
-        error: 'Sign up for 5 free searches to continue',
+        error: 'Sign up for free searches to continue',
         code: 'signup_required',
         blurred: true
       });
@@ -778,23 +408,9 @@ app.post('/api/search', searchLimiter, async (req, res) => {
     return res.status(400).json({ error: 'Email is required for search' });
   }
 
-  // Check access permissions
-  const [paidAccess, dayAccess, credits] = await Promise.all([
-    hasPaidAccess(normalizedEmail),
-    hasActiveDayAccess(normalizedEmail),
-    getCreditStatus(normalizedEmail)
-  ]);
-
-  const hasServerAccess = session?.role === 'owner' || paidAccess || dayAccess;
-  const canUseFreeSearch = !hasServerAccess && credits.freeSearches > 0;
-
-  if (!hasServerAccess && !canUseFreeSearch) {
-    return res.status(402).json({
-      error: 'Access required',
-      code: 'payment_required',
-      freeSearchesRemaining: credits.freeSearches || 0
-    });
-  }
+  // Check access permissions - app is now free, so always allow
+  const credits = await getCreditStatus(normalizedEmail);
+  const canUseFreeSearch = credits.freeSearches > 0;
 
   try {
     // Perform search using search service
@@ -826,7 +442,7 @@ app.post('/api/search', searchLimiter, async (req, res) => {
     res.json({
       ...payload,
       consumedFreeSearch: canUseFreeSearch,
-      accessType: hasServerAccess ? (session?.role === 'owner' ? 'owner' : 'paid') : 'free',
+      accessType: 'free',
       blurred: false
     });
   } catch (error) {
@@ -847,7 +463,7 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Server listening on http://0.0.0.0:${port}`);
+  console.log(`Access from network: http://192.168.0.41:${port}`);
 });
-

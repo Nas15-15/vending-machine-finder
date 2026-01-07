@@ -3,11 +3,15 @@ import { getStoredEmail, setStoredEmail, sanitizeEmail } from '../state/email.js
 import { fetchAccessStatus, invalidateAccessCache } from '../state/access.js';
 import { renderMarkers } from '../ui/map.js';
 import { renderResults, clearResults, selectLocation } from '../ui/results.js';
-import { showPaywall, showBlurOverlay, hideBlurOverlay } from '../ui/paywall.js';
 import { showToast } from '../ui/notifications.js';
 import { showResultsPopup } from '../ui/resultsPopup.js';
 import { setExportLocations } from '../ui/exportPanel.js';
 import { getFilters } from '../ui/advancedFilters.js';
+
+// App is now free - no paywall needed
+const showPaywall = () => { };
+const showBlurOverlay = () => { };
+const hideBlurOverlay = () => { };
 
 const loadingIndicator = document.getElementById('loadingIndicator');
 const errorMessage = document.getElementById('errorMessage');
@@ -90,11 +94,11 @@ export async function performSearch() {
       ...advancedFilters
     };
     // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/b612881c-bd0e-49ba-9272-bdca4a0a1a9d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'search.js:84',message:'calling apiPost',data:{path:'/api/search',hasQuery:!!query,hasEmail:!!email,excludeExisting,highTrafficOnly,filterKeys:Object.keys(advancedFilters)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    fetch('http://127.0.0.1:7242/ingest/b612881c-bd0e-49ba-9272-bdca4a0a1a9d', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'search.js:84', message: 'calling apiPost', data: { path: '/api/search', hasQuery: !!query, hasEmail: !!email, excludeExisting, highTrafficOnly, filterKeys: Object.keys(advancedFilters) }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'A' }) }).catch(() => { });
     // #endregion
     const response = await apiPost('/api/search', requestBody);
     // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/b612881c-bd0e-49ba-9272-bdca4a0a1a9d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'search.js:92',message:'apiPost response received',data:{hasResponse:!!response,hasResults:!!response?.results,resultsCount:response?.results?.length||0,blurred:response?.blurred},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    fetch('http://127.0.0.1:7242/ingest/b612881c-bd0e-49ba-9272-bdca4a0a1a9d', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'search.js:92', message: 'apiPost response received', data: { hasResponse: !!response, hasResults: !!response?.results, resultsCount: response?.results?.length || 0, blurred: response?.blurred }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'A' }) }).catch(() => { });
     // #endregion
     const locations = response.results || [];
 

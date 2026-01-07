@@ -33,8 +33,7 @@
     "express": "^4.19.2",
     "express-rate-limit": "^7.4.0",
     "jsonwebtoken": "^9.0.2",
-    "leaflet": "^1.9.4",
-    "stripe": "^14.23.0"
+    "leaflet": "^1.9.4"
   },
   "devDependencies": {
     "@vitejs/plugin-legacy": "^5.4.0",

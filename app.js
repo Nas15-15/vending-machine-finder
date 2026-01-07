@@ -9,6 +9,22 @@ let selectedLocationIndex = null;
 const urlParams = new URLSearchParams(window.location.search);
 const isNewUserPreview = urlParams.get('newUserPreview') === '1';
 
+function toggleLandingPage(show) {
+    const landing = document.getElementById('landingSection');
+    const dashboard = document.getElementById('dashboardSection');
+    const body = document.body;
+
+    if (show) {
+        if (landing) landing.classList.remove('hidden');
+        if (dashboard) dashboard.classList.add('hidden');
+        body.classList.add('landing-active');
+    } else {
+        if (landing) landing.classList.add('hidden');
+        if (dashboard) dashboard.classList.remove('hidden');
+        body.classList.remove('landing-active');
+    }
+}
+
 function createInMemoryStorage(seed = {}) {
     const store = { ...seed };
     return {
@@ -41,7 +57,6 @@ function isOwnerSessionActive() {
     return storage.getItem('ownerAccessActive') === 'true';
 }
 
-const STRIPE_PUBLISHABLE_KEY = window.__APP_CONFIG__?.STRIPE_PUBLISHABLE_KEY || '';
 const API_BASE_URL = window.__APP_CONFIG__?.API_BASE_URL || '';
 const NOMINATIM_CONTACT = 'support@vendingmachinefinder.app';
 const DEFAULT_SEARCH_RADIUS_METERS = 5000;
@@ -50,7 +65,6 @@ const MAX_SEARCH_RADIUS_METERS = 80000;
 const MAX_SEGMENT_SIZE_METERS = 25000;
 const MAX_SEGMENT_ROWS = 3;
 const MAX_SEGMENT_COLS = 3;
-let stripeClient = null;
 const ACCESS_STATE_KEYS = new Set([
     'paidAccess',
     'promoUsed',
@@ -59,14 +73,6 @@ const ACCESS_STATE_KEYS = new Set([
     'freeUses',
     'bonusFreeSearches'
 ]);
-
-if (STRIPE_PUBLISHABLE_KEY && typeof Stripe !== 'undefined') {
-    try {
-        stripeClient = Stripe(STRIPE_PUBLISHABLE_KEY);
-    } catch (error) {
-        console.error('Failed to initialize Stripe', error);
-    }
-}
 
 function recordAccessUpgrade(method, metadata = {}) {
     const upgrades = JSON.parse(storage.getItem('accessUpgrades') || '[]');
@@ -106,7 +112,7 @@ const PROMO_CODES = {
         showOnPromoPage: true
     }
 };
-const BITCOIN_ADDRESS = 'bc1qckrkq5s3kg360q42w3tdwtx9uwtxmwfc7jruuu';
+// App is now free - no payment required
 
 // Check access status
 function getAccessStatus() {
@@ -118,16 +124,16 @@ function getAccessStatus() {
     const now = Date.now();
     const hasDayAccess = dayAccessExpiry > now;
     const ownerActive = isOwnerSessionActive();
-    
+
     if (!hasDayAccess && dayAccessExpiry) {
         storage.removeItem('dayAccessExpiry');
     }
-    
+
     const defaultFreeRemaining = freeUses < 1 ? 1 : 0;
     const bonusRemaining = Math.max(0, bonusFreeSearches);
     const totalFreeSearches = defaultFreeRemaining + bonusRemaining;
     const hasFreeUse = totalFreeSearches > 0;
-    
+
     return {
         freeUses,
         bonusFreeSearches: bonusRemaining,
@@ -155,13 +161,13 @@ function useFreeSearch() {
         storage.setItem('freeUses', '1');
         return true;
     }
-    
+
     const bonusFreeSearches = parseInt(storage.getItem('bonusFreeSearches') || '0', 10);
     if (bonusFreeSearches > 0) {
         storage.setItem('bonusFreeSearches', String(bonusFreeSearches - 1));
         return true;
     }
-    
+
     return false;
 }
 
@@ -176,6 +182,7 @@ function grantPaidAccess(details = {}, options = {}) {
     if (typeof updateProfileVisibility === 'function') {
         updateProfileVisibility();
     }
+    toggleLandingPage(false);
 }
 
 // Grant promo access
@@ -189,6 +196,7 @@ function grantPromoAccess(details = {}, options = {}) {
     if (typeof updateProfileVisibility === 'function') {
         updateProfileVisibility();
     }
+    toggleLandingPage(false);
 }
 
 function getPromoUsageMap() {
@@ -241,18 +249,18 @@ function redeemPromoCode(rawCode) {
     if (!inputCode) {
         return { success: false, message: 'Enter a promo code to continue.' };
     }
-    
+
     const normalizedCode = inputCode.toUpperCase();
     const promoDetails = PROMO_CODES[normalizedCode];
-    
+
     if (!promoDetails) {
         return { success: false, message: 'Invalid promo code. Please double-check and try again.' };
     }
-    
+
     if (hasUsedPromoCode(normalizedCode)) {
         return { success: false, message: 'You have already used this promo code on this device.' };
     }
-    
+
     switch (promoDetails.type) {
         case 'free_search':
             addBonusFreeSearches(promoDetails.bonusSearches || 1);
@@ -265,12 +273,12 @@ function redeemPromoCode(rawCode) {
             grantPromoAccess({ code: normalizedCode });
             break;
     }
-    
+
     markPromoCodeUsed(normalizedCode);
     updateUsageIndicator();
-    
+
     const status = getAccessStatus();
-    
+
     return {
         success: true,
         code: normalizedCode,
@@ -329,7 +337,7 @@ function verifyBitcoinPayment() {
     const txIdInput = document.getElementById('transactionIdInput');
     const statusDiv = document.getElementById('verificationStatus');
     const txId = txIdInput ? txIdInput.value.trim() : '';
-    
+
     // Check if transaction ID is provided
     if (!txId) {
         if (txIdInput) {
@@ -342,7 +350,7 @@ function verifyBitcoinPayment() {
         }
         return;
     }
-    
+
     // Validate transaction ID format (Bitcoin TXIDs are 64 character hex strings)
     const txIdPattern = /^[a-fA-F0-9]{64}$/;
     if (!txIdPattern.test(txId)) {
@@ -357,7 +365,7 @@ function verifyBitcoinPayment() {
         }
         return;
     }
-    
+
     // Show verifying status
     btn.textContent = 'Verifying...';
     btn.disabled = true;
@@ -366,47 +374,47 @@ function verifyBitcoinPayment() {
         statusDiv.className = 'verification-status verifying';
         statusDiv.textContent = 'Checking blockchain for transaction...';
     }
-    
+
     // Simulate verification process (in production, this would check a real API)
     setTimeout(() => {
         if (statusDiv) {
             statusDiv.textContent = 'Verifying transaction details...';
         }
     }, 1500);
-    
+
     setTimeout(() => {
         // In a real implementation, you would:
         // 1. Check blockchain API (e.g., Blockstream API, Blockchain.info)
         // 2. Verify the transaction exists
         // 3. Verify it was sent to the correct address
         // 4. Verify the amount matches $9.99 USD
-        
+
         // For demo purposes, we'll check if it's a valid format and simulate verification
         // In production, replace this with actual API call:
         // const verified = await checkBitcoinTransaction(txId, BITCOIN_ADDRESS, 9.99);
-        
+
         // Simulate: Check if transaction ID looks valid (for demo, any valid format works)
         // In real implementation, this would fail if transaction doesn't exist or doesn't match
         const verified = true; // This would come from API in production
-        
+
         if (verified) {
             // Show success status
             if (statusDiv) {
                 statusDiv.className = 'verification-status success';
                 statusDiv.textContent = '✓ Payment verified successfully!';
             }
-            
+
             // Grant access after short delay
             setTimeout(() => {
                 grantPaidAccess({ transactionId: txId });
-                
+
                 // Close paywall immediately (force close)
                 const paywall = document.getElementById('paywallOverlay');
                 if (paywall) {
                     paywall.style.display = 'none';
                     paywall.classList.add('hidden');
                 }
-                
+
                 // Force hide blur overlay
                 const blurOverlay = document.getElementById('blurOverlay');
                 if (blurOverlay) {
@@ -418,14 +426,14 @@ function verifyBitcoinPayment() {
                     resultsSection.classList.remove('locked');
                     resultsSection.style.filter = '';
                 }
-                
+
                 updateUsageIndicator();
-                
+
                 // Refresh results if they exist - force show
                 if (currentResults.length > 0) {
                     displayResults(currentResults, true);
                 }
-                
+
                 // Show success notification (non-blocking)
                 setTimeout(() => {
                     showSuccessNotification('Payment verified! You now have full access.');
@@ -439,7 +447,7 @@ function verifyBitcoinPayment() {
             }
             btn.textContent = 'Verify Payment';
             btn.disabled = false;
-            
+
             if (txIdInput) {
                 txIdInput.style.borderColor = '#dc3545';
             }
@@ -454,20 +462,20 @@ function showSuccessNotification(message) {
     if (existing) {
         existing.remove();
     }
-    
+
     // Create notification element
     const notification = document.createElement('div');
     notification.id = 'successNotification';
     notification.className = 'success-notification';
     notification.textContent = message;
-    
+
     document.body.appendChild(notification);
-    
+
     // Animate in
     setTimeout(() => {
         notification.classList.add('show');
     }, 10);
-    
+
     // Auto-remove after 3 seconds
     setTimeout(() => {
         notification.classList.remove('show');
@@ -481,12 +489,12 @@ function showSuccessNotification(message) {
 function verifyPromoCode() {
     const input = document.getElementById('promoCodeInput');
     if (!input) return;
-    
+
     const result = redeemPromoCode(input.value);
-    
+
     if (result.success) {
         input.value = '';
-        
+
         if (result.shouldUnlock) {
             closePaywall();
             hideBlurOverlay();
@@ -494,7 +502,7 @@ function verifyPromoCode() {
                 displayResults(currentResults, true);
             }
         }
-        
+
         setTimeout(() => {
             showSuccessNotification(result.message || 'Promo applied!');
         }, 100);
@@ -526,7 +534,7 @@ function renderPromoPerks() {
     const freeCountEl = document.getElementById('promoFreeCount');
     const freeCaptionEl = document.getElementById('promoFreeCaption');
     const dayStatusEl = document.getElementById('promoDayStatus');
-    
+
     if (freeCountEl) {
         freeCountEl.textContent = status.freeSearchesRemaining || 0;
     }
@@ -552,9 +560,9 @@ function showPromoPageStatus(message, variant = 'info') {
 function initPromoPage() {
     const promoForm = document.getElementById('promoRedeemForm');
     const promoInput = document.getElementById('promoPageInput');
-    
+
     if (!promoForm || !promoInput) return;
-    
+
     promoForm.addEventListener('submit', (event) => {
         event.preventDefault();
         const result = redeemPromoCode(promoInput.value);
@@ -566,14 +574,14 @@ function initPromoPage() {
         }
         renderPromoPerks();
     });
-    
+
     promoInput.addEventListener('keypress', (event) => {
         if (event.key === 'Enter') {
             event.preventDefault();
             promoForm.dispatchEvent(new Event('submit'));
         }
     });
-    
+
     renderPromoPerks();
 }
 
@@ -587,7 +595,7 @@ function showBlurOverlay() {
 function hideBlurOverlay() {
     const blurOverlay = document.getElementById('blurOverlay');
     const resultsSection = document.getElementById('resultsSection');
-    
+
     if (blurOverlay) {
         blurOverlay.classList.add('hidden');
         blurOverlay.style.display = 'none'; // Force hide
@@ -601,16 +609,16 @@ function hideBlurOverlay() {
 function refreshAccessUi(options = {}) {
     const { refreshResults = true } = options;
     const status = getAccessStatus();
-    
+
     updateUsageIndicator();
-    
+
     if (!status.hasAccess) {
         return;
     }
-    
+
     closePaywall();
     hideBlurOverlay();
-    
+
     if (refreshResults && currentResults.length > 0) {
         displayResults(currentResults, true);
     }
@@ -656,32 +664,32 @@ function prefillCheckoutEmail() {
 async function startCardCheckout() {
     const btn = document.getElementById('cardCheckoutBtn');
     const email = getCheckoutEmail().toLowerCase();
-    
+
     // Check if Stripe is configured
     if (!STRIPE_PUBLISHABLE_KEY || STRIPE_PUBLISHABLE_KEY === 'pk_test_replace_me') {
         updateCardStatus('⚠️ Stripe is not configured. Please set up your API keys.', 'error');
         return;
     }
-    
+
     if (!stripeClient) {
         updateCardStatus('⚠️ Stripe failed to load. Please refresh and try again.', 'error');
         return;
     }
-    
+
     if (!API_BASE_URL) {
         updateCardStatus('⚠️ Server URL not configured.', 'error');
         return;
     }
-    
+
     if (!email || !isValidEmail(email)) {
         updateCardStatus('Enter a valid email before paying.', 'error');
         if (btn) btn.disabled = false;
         return;
     }
-    
+
     updateCardStatus('Creating secure checkout session…');
     if (btn) btn.disabled = true;
-    
+
     try {
         storage.setItem('pendingCheckoutEmail', email);
         const response = await fetch(`${API_BASE_URL}/api/create-checkout-session`, {
@@ -689,7 +697,7 @@ async function startCardCheckout() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email })
         });
-        
+
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
             if (errorData.error === 'Stripe is not configured') {
@@ -697,12 +705,12 @@ async function startCardCheckout() {
             }
             throw new Error('SERVER_ERROR');
         }
-        
+
         const data = await response.json();
         if (!data.id) {
             throw new Error('Missing session id');
         }
-        
+
         updateCardStatus('Redirecting to Stripe…', 'success');
         const { error } = await stripeClient.redirectToCheckout({ sessionId: data.id });
         if (error) {
@@ -710,9 +718,9 @@ async function startCardCheckout() {
         }
     } catch (error) {
         console.error('Stripe checkout failed', error);
-        
+
         let errorMessage = 'Could not start checkout. Please try again.';
-        
+
         if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
             errorMessage = '⚠️ Cannot connect to server. Make sure the server is running (npm start).';
         } else if (error.message === 'SERVER_NOT_CONFIGURED') {
@@ -720,7 +728,7 @@ async function startCardCheckout() {
         } else if (error.message === 'SERVER_ERROR') {
             errorMessage = '⚠️ Server error. Check server logs for details.';
         }
-        
+
         updateCardStatus(errorMessage, 'error');
         if (btn) btn.disabled = false;
     }
@@ -734,11 +742,11 @@ async function syncPaidAccessFromServer() {
         storage.getItem('pendingCheckoutEmail') ||
         ''
     ).trim();
-    
+
     if (!storedEmail || !isValidEmail(storedEmail)) {
         return;
     }
-    
+
     try {
         const response = await fetch(`${API_BASE_URL}/api/access-status?email=${encodeURIComponent(storedEmail)}`);
         if (!response.ok) return;
@@ -758,9 +766,9 @@ function initMap(center = [39.8283, -98.5795]) {
     if (map) {
         map.remove();
     }
-    
+
     map = L.map('mapContainer').setView(center, 13);
-    
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
         maxZoom: 19
@@ -776,12 +784,12 @@ function refreshMapView(options = {}) {
     if (!mapContainer) {
         return;
     }
-    
+
     if (scrollIntoViewIfNeeded) {
         const rect = mapContainer.getBoundingClientRect();
         const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
         const isOutOfView = rect.bottom <= 0 || rect.top >= viewportHeight;
-        
+
         if (isOutOfView) {
             mapContainer.scrollIntoView({
                 behavior: 'smooth',
@@ -789,11 +797,11 @@ function refreshMapView(options = {}) {
             });
         }
     }
-    
+
     const raf = (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function')
         ? window.requestAnimationFrame.bind(window)
         : (cb) => setTimeout(cb, 16);
-    
+
     raf(() => {
         if (map && typeof map.invalidateSize === 'function') {
             map.invalidateSize();
@@ -808,7 +816,7 @@ async function geocodeLocation(location) {
             `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&limit=1&email=${encodeURIComponent(NOMINATIM_CONTACT)}`
         );
         const data = await response.json();
-        
+
         if (data && data.length > 0) {
             const result = data[0];
             const boundingBox = normalizeBoundingBox(result.boundingbox);
@@ -833,17 +841,17 @@ function normalizeBoundingBox(rawBoundingBox) {
     if (!Array.isArray(rawBoundingBox) || rawBoundingBox.length !== 4) {
         return null;
     }
-    
+
     const parsed = rawBoundingBox.map(value => parseFloat(value));
     if (parsed.some(value => Number.isNaN(value))) {
         return null;
     }
-    
+
     const [south, north, west, east] = parsed;
     if (south >= north || west >= east) {
         return null;
     }
-    
+
     return parsed;
 }
 
@@ -874,14 +882,14 @@ function estimateRadiusFromType(placeType = '') {
         province: 60000,
         region: 60000
     };
-    
+
     return radiusHints[placeType] || DEFAULT_SEARCH_RADIUS_METERS;
 }
 
 function deriveSearchRegions(geocoded) {
     const boundingBox = Array.isArray(geocoded.boundingBox) ? geocoded.boundingBox : null;
     const baseRadius = clampRadius(estimateRadiusFromType(geocoded.type));
-    
+
     if (!boundingBox) {
         return [{
             centerLat: geocoded.lat,
@@ -890,19 +898,19 @@ function deriveSearchRegions(geocoded) {
             boundingBox: null
         }];
     }
-    
+
     const [south, north, west, east] = boundingBox;
     const centerLat = geocoded.lat;
     const latMeters = metersFromLatSpan(north - south);
     const lonMeters = metersFromLonSpan(east - west, centerLat);
     const diagonalMeters = Math.sqrt(latMeters ** 2 + lonMeters ** 2);
     const coverageRadius = clampRadius(Math.max(baseRadius, diagonalMeters / 2 + 500));
-    
+
     const rowsNeeded = Math.ceil(latMeters / MAX_SEGMENT_SIZE_METERS);
     const colsNeeded = Math.ceil(lonMeters / MAX_SEGMENT_SIZE_METERS);
     const rows = Math.min(Math.max(rowsNeeded, 1), MAX_SEGMENT_ROWS);
     const cols = Math.min(Math.max(colsNeeded, 1), MAX_SEGMENT_COLS);
-    
+
     if (rows === 1 && cols === 1) {
         return [{
             centerLat: geocoded.lat,
@@ -911,11 +919,11 @@ function deriveSearchRegions(geocoded) {
             boundingBox
         }];
     }
-    
+
     const latStep = (north - south) / rows;
     const lonStep = (east - west) / cols;
     const regions = [];
-    
+
     for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
             const segSouth = south + row * latStep;
@@ -928,7 +936,7 @@ function deriveSearchRegions(geocoded) {
             const segLonMeters = metersFromLonSpan(segEast - segWest, segCenterLat);
             const segDiagonal = Math.sqrt(segLatMeters ** 2 + segLonMeters ** 2);
             const segRadius = clampRadius(Math.max(baseRadius, segDiagonal / 2 + 500));
-            
+
             regions.push({
                 centerLat: segCenterLat,
                 centerLon: segCenterLon,
@@ -937,7 +945,7 @@ function deriveSearchRegions(geocoded) {
             });
         }
     }
-    
+
     return regions;
 }
 
@@ -987,33 +995,33 @@ function buildLocationNameFromTags(tags = {}, category) {
         'addr:place',
         'addr:full'
     ];
-    
+
     for (const key of candidateKeys) {
         const value = tags[key];
         if (value && value.trim() && !isGenericName(value, category)) {
             return value.trim();
         }
     }
-    
+
     const street = tags['addr:street'] || tags['addr:road'];
     const housenumber = tags['addr:housenumber'];
     const city = tags['addr:city'] || tags['addr:town'] || tags['addr:village'];
     const descriptor = formatCategoryLabel(category);
-    
+
     if (street && city) {
         const streetLine = housenumber ? `${housenumber} ${street}` : street;
         return `${descriptor} near ${streetLine}, ${city}`;
     }
-    
+
     if (city) {
         return `${descriptor} in ${city}`;
     }
-    
+
     if (street) {
         const streetLine = housenumber ? `${housenumber} ${street}` : street;
         return `${descriptor} on ${streetLine}`;
     }
-    
+
     return descriptor;
 }
 
@@ -1023,56 +1031,56 @@ function buildAddressFromTags(tags = {}) {
         tags['addr:street'] || tags['addr:road']
     ].filter(Boolean);
     const streetLine = streetParts.join(' ').trim();
-    
+
     const localityParts = [
         tags['addr:neighbourhood'] || tags['addr:suburb'],
         tags['addr:city'] || tags['addr:town'] || tags['addr:village']
     ].filter(Boolean);
     const localityLine = localityParts.join(', ');
-    
+
     const regionParts = [
         tags['addr:state'],
         tags['addr:postcode']
     ].filter(Boolean);
     const regionLine = regionParts.join(' ').trim();
-    
+
     const country = tags['addr:country'];
-    
+
     const components = [];
     if (streetLine) components.push(streetLine);
     if (localityLine) components.push(localityLine);
     if (regionLine) components.push(regionLine);
     if (country) components.push(country);
-    
+
     if (!components.length && tags['addr:full']) {
         return tags['addr:full'];
     }
-    
+
     return components.join(', ');
 }
 
 function buildAddressFromReverse(address = {}) {
     if (!address) return '';
-    
+
     const street = address.road || address.pedestrian || address.path || address.cycleway || address.footway;
     const streetParts = [
         address.house_number,
         street
     ].filter(Boolean);
     const streetLine = streetParts.join(' ').trim();
-    
+
     const locality = address.neighbourhood || address.suburb || address.quarter || address.city_district || address.town || address.city || address.village;
     const region = address.state || address.county;
     const postcode = address.postcode;
     const country = address.country;
-    
+
     const components = [];
     if (streetLine) components.push(streetLine);
     if (locality) components.push(locality);
     const regionLine = [region, postcode].filter(Boolean).join(' ').trim();
     if (regionLine) components.push(regionLine);
     if (country) components.push(country);
-    
+
     return components.join(', ');
 }
 
@@ -1081,15 +1089,15 @@ async function reverseGeocode(lat, lon) {
     if (reverseGeocodeCache.has(cacheKey)) {
         return reverseGeocodeCache.get(cacheKey);
     }
-    
+
     const now = Date.now();
     const elapsed = now - lastReverseLookupTime;
     if (elapsed < NOMINATIM_THROTTLE_MS) {
         await sleep(NOMINATIM_THROTTLE_MS - elapsed);
     }
-    
+
     const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1&email=${encodeURIComponent(NOMINATIM_CONTACT)}`;
-    
+
     try {
         const response = await fetch(url);
         if (!response.ok) {
@@ -1111,15 +1119,15 @@ async function enrichLocationDetails(locations = [], maxLookups = MAX_ENRICHED_L
     if (!Array.isArray(locations) || locations.length === 0) {
         return;
     }
-    
+
     const targets = locations
         .filter(loc => isGenericName(loc.name, loc.category) || !loc.address)
         .slice(0, maxLookups);
-    
+
     for (const location of targets) {
         const details = await reverseGeocode(location.lat, location.lon);
         if (!details) continue;
-        
+
         const enrichedName = details.name ||
             details.address?.mall ||
             details.address?.retail ||
@@ -1128,16 +1136,16 @@ async function enrichLocationDetails(locations = [], maxLookups = MAX_ENRICHED_L
         if (enrichedName && isGenericName(location.name, location.category)) {
             location.name = enrichedName;
         }
-        
+
         const enrichedAddress = buildAddressFromReverse(details.address) || details.display_name;
         if (enrichedAddress) {
             location.address = enrichedAddress;
         }
-        
+
         if (!location.displayCategory && details.type) {
             location.displayCategory = formatCategoryLabel(details.type);
         }
-        
+
         if (!location.type && details.category) {
             location.type = formatCategoryLabel(details.category);
         }
@@ -1148,22 +1156,22 @@ async function enrichLocationDetails(locations = [], maxLookups = MAX_ENRICHED_L
 async function findHighTrafficLocations(centerLat, centerLon, radius = DEFAULT_SEARCH_RADIUS_METERS, progressCallback = null, boundingBox = null) {
     const locations = [];
     const locationMap = new Map(); // For deduplication
-    
+
     if (progressCallback) {
         progressCallback('Searching for high-traffic locations...');
     }
-    
+
     // Use Overpass API to search for all high-traffic location types at once
     // This is much more efficient and reliable than individual category searches
     try {
         const timeout = boundingBox ? 45 : 25;
         let areaSelector = `(around:${radius},${centerLat},${centerLon})`;
-        
+
         if (boundingBox && boundingBox.length === 4) {
             const [south, north, west, east] = boundingBox;
             areaSelector = `(${south},${west},${north},${east})`;
         }
-        
+
         const overpassQuery = `
             [out:json][timeout:${timeout}];
             (
@@ -1183,31 +1191,31 @@ async function findHighTrafficLocations(centerLat, centerLon, radius = DEFAULT_S
             );
             out center;
         `;
-        
+
         const overpassResponse = await fetch(
             `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`
         );
-        
+
         if (overpassResponse.ok) {
             const overpassData = await overpassResponse.json();
-            
+
             if (overpassData.elements) {
                 overpassData.elements.forEach(element => {
                     const lat = element.lat || element.center?.lat;
                     const lon = element.lon || element.center?.lon;
-                    
+
                     if (lat && lon) {
                         const distance = calculateDistance(centerLat, centerLon, lat, lon);
-                        
+
                         if (distance <= radius) {
                             const key = `${lat.toFixed(4)}_${lon.toFixed(4)}`;
-                            
+
                             if (!locationMap.has(key)) {
                                 const tags = element.tags || {};
-                                
+
                                 // Map OSM tags to our category system
                                 let category = tags.amenity || tags.shop || tags.aeroway || tags.railway || tags.leisure || 'other';
-                                
+
                                 // Normalize category names
                                 const categoryMap = {
                                     'aerodrome': 'airport',
@@ -1217,9 +1225,9 @@ async function findHighTrafficLocations(centerLat, centerLon, radius = DEFAULT_S
                                     'supermarket': 'supermarket',
                                     'convenience': 'supermarket'
                                 };
-                                
+
                                 category = categoryMap[category] || category;
-                                
+
                                 const readableCategory = formatCategoryLabel(category);
                                 const derivedName = buildLocationNameFromTags(tags, category);
                                 const derivedAddress = buildAddressFromTags(tags);
@@ -1229,7 +1237,7 @@ async function findHighTrafficLocations(centerLat, centerLon, radius = DEFAULT_S
                                 const contactEmail = tags['contact:email'] || tags.email || '';
                                 const contactWebsite = tags['contact:website'] || tags.website || tags.url || '';
                                 const openingHours = tags.opening_hours || '';
-                                
+
                                 const location = {
                                     name: derivedName,
                                     address: derivedAddress || '',
@@ -1247,7 +1255,7 @@ async function findHighTrafficLocations(centerLat, centerLon, radius = DEFAULT_S
                                     openingHours,
                                     rawTags: tags
                                 };
-                                
+
                                 locationMap.set(key, location);
                                 locations.push(location);
                             }
@@ -1261,25 +1269,25 @@ async function findHighTrafficLocations(centerLat, centerLon, radius = DEFAULT_S
     } catch (error) {
         console.error('Overpass API error:', error);
     }
-    
+
     if (progressCallback) {
         progressCallback(`Found ${locations.length} locations`);
     }
-    
+
     // Remove duplicates and return
     return Array.from(locationMap.values());
 }
 
 async function fetchLocationsForRegions(regions, progressCallback = null) {
     const combinedMap = new Map();
-    
+
     for (let i = 0; i < regions.length; i++) {
         const region = regions[i];
-        
+
         if (progressCallback) {
             progressCallback(`Scanning area ${i + 1}/${regions.length}...`);
         }
-        
+
         const regionLocations = await findHighTrafficLocations(
             region.centerLat,
             region.centerLon,
@@ -1287,19 +1295,19 @@ async function fetchLocationsForRegions(regions, progressCallback = null) {
             null,
             region.boundingBox
         );
-        
+
         regionLocations.forEach(location => {
             const key = `${location.lat.toFixed(5)}_${location.lon.toFixed(5)}`;
             if (!combinedMap.has(key)) {
                 combinedMap.set(key, location);
             }
         });
-        
+
         if (progressCallback) {
             progressCallback(`Collected ${combinedMap.size} locations (${i + 1}/${regions.length})`);
         }
     }
-    
+
     return Array.from(combinedMap.values());
 }
 
@@ -1307,16 +1315,16 @@ async function fetchLocationsForRegions(regions, progressCallback = null) {
 async function checkExistingVendingMachines(location) {
     // Skip API check to avoid rate limiting - use a simple heuristic instead
     // In production, you'd use a real database or API
-    
+
     // High-traffic areas are more likely to have vending machines, but not guaranteed
     // We'll be more lenient to show more results
     const highCompetitionCategories = ['airport', 'shopping_mall', 'hospital', 'university', 'train_station'];
-    
+
     if (highCompetitionCategories.includes(location.category)) {
         // 20% chance of existing vending machine (was 30%)
         return Math.random() < 0.2;
     }
-    
+
     // 5% chance for other locations (was 10%)
     return Math.random() < 0.05;
 }
@@ -1326,11 +1334,11 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371000; // Earth radius in meters
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-        Math.sin(dLat/2) * Math.sin(dLat/2) +
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
         Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
 }
 
@@ -1358,47 +1366,47 @@ function calculateFootTrafficScore(location) {
         'government': 50,
         'community_centre': 50
     };
-    
+
     let baseScore = categoryScores[location.category] || 40;
-    
+
     // Adjust based on distance from center (closer = better)
     const distancePenalty = Math.min(location.distance / 100, 20);
     baseScore -= distancePenalty;
-    
+
     return Math.max(0, Math.min(100, baseScore));
 }
 
 // Rank locations by potential
 async function rankLocations(locations, excludeExisting = true) {
     const ranked = [];
-    
+
     // Process locations with async checks
     for (const location of locations) {
         const footTrafficScore = calculateFootTrafficScore(location);
         const hasExisting = await checkExistingVendingMachines(location);
-        
+
         // Calculate overall score
         let score = footTrafficScore;
-        
+
         // Penalize if has existing vending machine
         if (excludeExisting && hasExisting) {
             continue; // Skip locations with existing vending machines
         }
-        
+
         // Bonus for certain high-value categories
         if (['airport', 'hospital', 'university', 'shopping_mall'].includes(location.category)) {
             score += 10;
         }
-        
+
         // Bonus for proximity to multiple high-traffic locations
-        const nearbyHighTraffic = locations.filter(loc => 
-            loc !== location && 
+        const nearbyHighTraffic = locations.filter(loc =>
+            loc !== location &&
             calculateDistance(location.lat, location.lon, loc.lat, loc.lon) < 500 &&
             ['airport', 'hospital', 'university', 'shopping_mall', 'gym', 'office'].includes(loc.category)
         ).length;
-        
+
         score += Math.min(nearbyHighTraffic * 2, 15); // Up to 15 point bonus
-        
+
         ranked.push({
             ...location,
             footTrafficScore: Math.round(footTrafficScore),
@@ -1407,7 +1415,7 @@ async function rankLocations(locations, excludeExisting = true) {
             nearbyHighTraffic: nearbyHighTraffic
         });
     }
-    
+
     // Sort by score and return top locations
     return ranked
         .sort((a, b) => b.overallScore - a.overallScore)
@@ -1419,16 +1427,16 @@ function displayResults(results, forceShow = false) {
     // Clear existing markers
     markers.forEach(marker => map.removeLayer(marker));
     markers = [];
-    
+
     const previousSelection = typeof selectedLocationIndex === 'number' ? selectedLocationIndex : null;
     resetLocationDetails({ collapsed: results.length === 0 });
-    
+
     if (results.length === 0) {
         document.getElementById('errorMessage').textContent = 'No suitable locations found. Try a different search area.';
         document.getElementById('errorMessage').classList.remove('hidden');
         return;
     }
-    
+
     // Check access only if not forcing show
     if (forceShow) {
         // Force hide blur overlay
@@ -1436,7 +1444,7 @@ function displayResults(results, forceShow = false) {
     } else {
         const status = getAccessStatus();
         const shouldBlur = !status.hasAccess;
-        
+
         // Show blur overlay if no access
         if (shouldBlur) {
             showBlurOverlay();
@@ -1444,14 +1452,14 @@ function displayResults(results, forceShow = false) {
             hideBlurOverlay();
         }
     }
-    
+
     // Add markers to map
     const bounds = [];
     results.forEach((result, index) => {
         const displayName = result.name || formatCategoryLabel(result.category);
         const displayAddress = result.address || 'Address unavailable';
         const displayCategory = result.type || result.displayCategory || formatCategoryLabel(result.category);
-        
+
         const marker = L.marker([result.lat, result.lon])
             .addTo(map)
             .bindPopup(`
@@ -1459,24 +1467,24 @@ function displayResults(results, forceShow = false) {
                 ${displayAddress}<br>
                 Score: ${result.overallScore}/100
             `);
-        
+
         marker.on('click', () => {
             selectLocation(index, { skipMap: true });
         });
-        
+
         markers.push(marker);
         bounds.push([result.lat, result.lon]);
     });
-    
+
     // Fit map to show all markers
     if (bounds.length > 0) {
         map.fitBounds(bounds, { padding: [50, 50] });
     }
-    
+
     // Display results list
     const resultsList = document.getElementById('resultsList');
     resultsList.innerHTML = '';
-    
+
     results.forEach((result, index) => {
         const card = document.createElement('div');
         card.className = 'result-card';
@@ -1484,14 +1492,14 @@ function displayResults(results, forceShow = false) {
         card.addEventListener('click', () => {
             selectLocation(index, { ensureMapVisible: true });
         });
-        
-        const scoreClass = result.overallScore >= 80 ? 'score-excellent' : 
-                          result.overallScore >= 60 ? 'score-good' : 'score-fair';
-        
+
+        const scoreClass = result.overallScore >= 80 ? 'score-excellent' :
+            result.overallScore >= 60 ? 'score-good' : 'score-fair';
+
         const cardName = result.name || formatCategoryLabel(result.category);
         const cardAddress = result.address || 'Address unavailable';
         const cardCategory = result.type || result.displayCategory || formatCategoryLabel(result.category);
-        
+
         card.innerHTML = `
             <div class="result-rank">#${index + 1}</div>
             ${index === 0 ? `
@@ -1530,14 +1538,14 @@ function displayResults(results, forceShow = false) {
             </div>
             ` : ''}
         `;
-        
+
         resultsList.appendChild(card);
     });
-    
+
     document.getElementById('resultsCount').textContent = results.length;
     document.getElementById('resultsSection').classList.remove('hidden');
     refreshMapView();
-    
+
     const status = getAccessStatus();
     if (status.hasAccess && results.length > 0) {
         let targetIndex = 0;
@@ -1555,7 +1563,7 @@ function resetLocationDetails(options = {}) {
     } = options;
     const panel = document.getElementById('locationDetailPanel');
     if (!panel) return;
-    
+
     if (collapsed) {
         panel.classList.add('hidden');
         panel.setAttribute('aria-hidden', 'true');
@@ -1563,14 +1571,14 @@ function resetLocationDetails(options = {}) {
         panel.classList.remove('hidden');
         panel.setAttribute('aria-hidden', 'false');
     }
-    
+
     selectedLocationIndex = null;
-    
+
     const setText = (id, value) => {
         const el = document.getElementById(id);
         if (el) el.textContent = value;
     };
-    
+
     setText('detailLocationName', 'Select a location');
     setText('detailLocationAddress', message);
     setText('detailOwnerName', '—');
@@ -1592,14 +1600,14 @@ function resetLocationDetails(options = {}) {
     setText('detailAgeSecondary', '—');
     setText('detailAgeNotes', '—');
     setText('detailSummaryText', 'Choose a location to generate a tailored breakdown of demand and demographics.');
-    
+
     const streetViewBtn = document.getElementById('streetViewBtn');
     if (streetViewBtn) {
         streetViewBtn.disabled = true;
         streetViewBtn.onclick = null;
         streetViewBtn.title = 'Street View unavailable until a location is selected';
     }
-    
+
     const contactBtn = document.getElementById('ownerContactBtn');
     if (contactBtn) {
         contactBtn.disabled = true;
@@ -1613,10 +1621,10 @@ function selectLocation(index, options = {}) {
     if (!Array.isArray(currentResults) || !currentResults.length) return;
     const location = currentResults[index];
     if (!location) return;
-    
+
     const { skipMap = false, ensureMapVisible = false } = options;
     selectedLocationIndex = index;
-    
+
     document.querySelectorAll('.result-card').forEach(card => card.classList.remove('selected'));
     const targetCard = document.querySelector(`.result-card[data-index="${index}"]`);
     if (targetCard) {
@@ -1625,13 +1633,13 @@ function selectLocation(index, options = {}) {
             targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
     }
-    
+
     if (!skipMap && map) {
         map.setView([location.lat, location.lon], 16);
     }
-    
+
     renderLocationDetails(location);
-    
+
     if (ensureMapVisible) {
         refreshMapView({ scrollIntoViewIfNeeded: true });
     }
@@ -1640,10 +1648,10 @@ function selectLocation(index, options = {}) {
 function renderLocationDetails(location) {
     const panel = document.getElementById('locationDetailPanel');
     if (!panel || !location) return;
-    
+
     panel.classList.remove('hidden');
     panel.setAttribute('aria-hidden', 'false');
-    
+
     const safeName = location.name || formatCategoryLabel(location.category);
     const address = location.address || 'Address unavailable';
     const vendingMessage = location.hasExistingVendingMachine
@@ -1655,12 +1663,12 @@ function renderLocationDetails(location) {
     const demographics = getDemographicProfile(location.category);
     const summary = buildLocationNarrative(location, visitors, demographics);
     const contactDetails = deriveOwnerContactDetails(location);
-    
+
     const setText = (id, value) => {
         const el = document.getElementById(id);
         if (el) el.textContent = value;
     };
-    
+
     setText('detailLocationName', safeName);
     setText('detailLocationAddress', address);
     setText('detailOwnerName', contactDetails.ownerName || 'Not listed');
@@ -1674,7 +1682,7 @@ function renderLocationDetails(location) {
     setText('detailAgeSecondary', demographics.secondary);
     setText('detailAgeNotes', demographics.notes);
     setText('detailSummaryText', summary);
-    
+
     const contactContainer = document.getElementById('detailOwnerContacts');
     if (contactContainer) {
         contactContainer.innerHTML = '';
@@ -1699,7 +1707,7 @@ function renderLocationDetails(location) {
             });
         }
     }
-    
+
     setupStreetViewButton(location.lat, location.lon);
     setupOwnerContactButton(contactDetails.primaryAction);
 }
@@ -1710,9 +1718,9 @@ function deriveOwnerContactDetails(location = {}) {
     const phoneRaw = location.contactPhone || tags['contact:phone'] || tags.phone || '';
     const emailRaw = location.contactEmail || tags['contact:email'] || tags.email || '';
     const websiteRaw = location.contactWebsite || tags['contact:website'] || tags.website || tags.url || '';
-    
+
     const contacts = [];
-    
+
     if (phoneRaw) {
         const sanitized = phoneRaw.trim();
         contacts.push({
@@ -1723,7 +1731,7 @@ function deriveOwnerContactDetails(location = {}) {
             href: `tel:${sanitized.replace(/[^+0-9]/g, '')}`
         });
     }
-    
+
     if (emailRaw) {
         const sanitized = emailRaw.trim();
         contacts.push({
@@ -1734,7 +1742,7 @@ function deriveOwnerContactDetails(location = {}) {
             href: `mailto:${sanitized}`
         });
     }
-    
+
     if (websiteRaw) {
         const url = normalizeContactUrl(websiteRaw);
         contacts.push({
@@ -1745,7 +1753,7 @@ function deriveOwnerContactDetails(location = {}) {
             href: url
         });
     }
-    
+
     return {
         ownerName: ownerName || 'Not listed',
         contacts,
@@ -1771,11 +1779,11 @@ function estimateDailyVisitors(score = 50, category = '') {
         government: { min: 300, max: 2500 },
         cinema: { min: 400, max: 3500 }
     };
-    
+
     const range = categoryRanges[category] || { min: 250, max: 6000 };
     const boundedScore = Math.min(Math.max(score || 0, 0), 100);
     const estimated = Math.round(range.min + (range.max - range.min) * (boundedScore / 100));
-    
+
     return {
         value: estimated,
         display: estimated.toLocaleString(),
@@ -1836,7 +1844,7 @@ function getDemographicProfile(category = '') {
             notes: 'Game-day spikes favor cold drinks, merch tie-ins, and shareable snacks.'
         }
     };
-    
+
     return profiles[category] || {
         primary: '25-54 • Mixed audience',
         secondary: '18-24 + 55+ spillover traffic',
@@ -1858,7 +1866,7 @@ function buildLocationNarrative(location, visitorsInfo, demographics) {
         ? 'Expect some competition from existing vending machines already flagged nearby.'
         : 'No vending machines were detected nearby, giving you a first-mover advantage.';
     const productHint = suggestProductForCategory(location.category);
-    
+
     return `${baseName} (${categoryLabel}) pulls roughly ${visitorsInfo.display} visitors per day ${distanceText}. ${anchorText}. ${competitionText} Audience skews ${demographics.primary}, so stock up on ${productHint}.`;
 }
 
@@ -1875,14 +1883,14 @@ function suggestProductForCategory(category = '') {
         stadium: 'sports drinks, salty snacks, and fan-themed items',
         restaurant: 'dessert add-ons, kids treats, and bottled beverages'
     };
-    
+
     return suggestions[category] || 'a balanced mix of cold drinks, quick meals, and indulgent treats';
 }
 
 function setupStreetViewButton(lat, lon) {
     const streetViewBtn = document.getElementById('streetViewBtn');
     if (!streetViewBtn) return;
-    
+
     const url = buildStreetViewUrl(lat, lon);
     if (!url) {
         streetViewBtn.disabled = true;
@@ -1890,7 +1898,7 @@ function setupStreetViewButton(lat, lon) {
         streetViewBtn.title = 'Street View unavailable for this location';
         return;
     }
-    
+
     streetViewBtn.disabled = false;
     streetViewBtn.title = 'Open Google Street View in a new tab';
     streetViewBtn.onclick = () => {
@@ -1901,7 +1909,7 @@ function setupStreetViewButton(lat, lon) {
 function setupOwnerContactButton(primaryAction) {
     const contactBtn = document.getElementById('ownerContactBtn');
     if (!contactBtn) return;
-    
+
     if (!primaryAction) {
         contactBtn.disabled = true;
         contactBtn.onclick = null;
@@ -1909,7 +1917,7 @@ function setupOwnerContactButton(primaryAction) {
         contactBtn.title = 'No contact details available';
         return;
     }
-    
+
     contactBtn.disabled = false;
     contactBtn.onclick = () => {
         if (primaryAction.type === 'url') {
@@ -1918,7 +1926,7 @@ function setupOwnerContactButton(primaryAction) {
             window.open(primaryAction.href, '_self');
         }
     };
-    
+
     if (primaryAction.type === 'email') {
         contactBtn.textContent = 'Email owner';
     } else if (primaryAction.type === 'phone') {
@@ -1926,7 +1934,7 @@ function setupOwnerContactButton(primaryAction) {
     } else {
         contactBtn.textContent = 'Visit owner site';
     }
-    
+
     contactBtn.title = `Preferred contact: ${primaryAction.display}`;
 }
 
@@ -1948,15 +1956,15 @@ async function performSearch() {
     const locationInput = document.getElementById('locationInput').value.trim();
     const excludeExisting = document.getElementById('excludeExisting').checked;
     const highTrafficOnly = document.getElementById('highTrafficOnly').checked;
-    
+
     if (!locationInput) {
         alert('Please enter a location');
         return;
     }
-    
+
     // Check access before searching
     const status = getAccessStatus();
-    
+
     // If user has free use available, allow the search and mark it as used after search completes
     if (status.hasFreeUse) {
         // Allow search to proceed - we'll mark free use as consumed after successful search
@@ -1966,50 +1974,50 @@ async function performSearch() {
         showPaywall();
         return;
     }
-    
+
     // Show loading
     document.getElementById('loadingIndicator').classList.remove('hidden');
     document.getElementById('resultsSection').classList.add('hidden');
     document.getElementById('errorMessage').classList.add('hidden');
     hideBlurOverlay();
     resetLocationDetails({ collapsed: true });
-    
+
     try {
         // Geocode the input location
         const geocoded = await geocodeLocation(locationInput);
-        
+
         // Initialize map at location
         initMap([geocoded.lat, geocoded.lon]);
-        
+
         // Update loading message
         const loadingEl = document.getElementById('loadingIndicator');
         const loadingText = loadingEl.querySelector('p');
-        
+
         // Progress callback
         const updateProgress = (message) => {
             loadingText.textContent = message;
         };
-        
+
         loadingText.textContent = 'Searching for high-traffic locations...';
-        
+
         const searchRegions = deriveSearchRegions(geocoded);
         if (searchRegions.length > 1) {
             updateProgress(`Dividing area into ${searchRegions.length} zones...`);
         }
-        
+
         const locations = await fetchLocationsForRegions(searchRegions, updateProgress);
-        
+
         console.log(`Found ${locations.length} locations before ranking`);
-        
+
         if (locations.length === 0) {
             throw new Error('No locations found in this area. Try a larger city or more populated area.');
         }
-        
+
         loadingText.textContent = `Found ${locations.length} locations. Analyzing competition...`;
-        
+
         // Rank locations
         let ranked = await rankLocations(locations, excludeExisting);
-        
+
         // Try to enrich generic names with more precise place info
         loadingText.textContent = 'Polishing place details...';
         try {
@@ -2017,38 +2025,38 @@ async function performSearch() {
         } catch (enrichError) {
             console.warn('Failed to enrich location details', enrichError);
         }
-        
+
         console.log(`After ranking: ${ranked.length} locations`);
-        
+
         // Filter by high traffic if requested
         if (highTrafficOnly) {
             const beforeFilter = ranked.length;
             ranked = ranked.filter(loc => loc.footTrafficScore >= 60);
             console.log(`After high-traffic filter: ${ranked.length} locations (filtered ${beforeFilter - ranked.length})`);
         }
-        
+
         if (ranked.length === 0) {
             throw new Error(`No suitable locations found. Found ${locations.length} locations but none met the criteria. Try unchecking "High traffic areas only" or "Exclude areas with existing vending machines".`);
         }
-        
+
         // Mark free use as consumed after successful search
         const accessStatus = getAccessStatus();
         if (accessStatus.hasFreeUse) {
             useFreeSearch(); // Mark free use as used
             updateUsageIndicator();
         }
-        
+
         // Display results
         currentResults = ranked;
-        
+
         // Check if we should blur (after first free use)
         const finalAccessStatus = getAccessStatus();
         const shouldBlur = !finalAccessStatus.hasAccess;
         displayResults(ranked, !shouldBlur);
-        
+
     } catch (error) {
         console.error('Search error:', error);
-        document.getElementById('errorMessage').textContent = 
+        document.getElementById('errorMessage').textContent =
             `Error: ${error.message}. Please try a different location or adjust your search filters.`;
         document.getElementById('errorMessage').classList.remove('hidden');
         document.getElementById('resultsSection').classList.add('hidden');
@@ -2071,7 +2079,7 @@ function updateHeroCtas(status) {
     const ctaNote = document.querySelector('.cta-note');
     const ownerPill = document.getElementById('ownerControlPill');
     const shouldHide = Boolean(status?.hasAccess);
-    
+
     [ctaRow, ctaNote].forEach((element) => {
         if (!element) return;
         if (shouldHide) {
@@ -2080,7 +2088,7 @@ function updateHeroCtas(status) {
             element.classList.remove('hidden');
         }
     });
-    
+
     if (ownerPill) {
         if (isOwnerSessionActive()) {
             ownerPill.classList.remove('hidden');
@@ -2088,7 +2096,7 @@ function updateHeroCtas(status) {
             ownerPill.classList.add('hidden');
         }
     }
-    
+
     updateOwnerModeIndicator();
 }
 
@@ -2097,11 +2105,11 @@ function updateUsageIndicator() {
     const indicator = document.getElementById('usageIndicator');
     const usageText = document.getElementById('usageText');
     const ownerActive = status.ownerActive;
-    
+
     updateHeroCtas(status);
-    
+
     if (!indicator || !usageText) return;
-    
+
     if (isNewUserPreview) {
         indicator.classList.remove('hidden');
         indicator.classList.add('preview-mode');
@@ -2111,12 +2119,12 @@ function updateUsageIndicator() {
     } else {
         indicator.classList.remove('preview-mode');
     }
-    
+
     if (ownerActive || status.isPaid || status.promoUsed || status.hasDayAccess) {
         indicator.classList.add('hidden');
         return;
     }
-    
+
     if (status.hasFreeUse) {
         indicator.classList.remove('hidden');
         const remaining = status.freeSearchesRemaining || 1;
@@ -2136,7 +2144,7 @@ function updateOwnerModeIndicator() {
     if (!indicator) {
         return;
     }
-    
+
     if (isOwnerSessionActive()) {
         indicator.classList.remove('hidden');
         indicator.setAttribute('aria-hidden', 'false');
@@ -2152,11 +2160,19 @@ window.addEventListener('DOMContentLoaded', () => {
     updateUsageIndicator();
     prefillCheckoutEmail();
     syncPaidAccessFromServer();
-    
+
+    // Check access and route
+    const hasInitialAccess = hasAccess();
+    if (hasInitialAccess && !isNewUserPreview) {
+        toggleLandingPage(false); // Show Dashboard
+    } else {
+        toggleLandingPage(true); // Show Landing Page
+    }
+
     if (isNewUserPreview) {
         showSuccessNotification('Preview mode enabled. This tab simulates a first-time visitor without touching your actual session.');
     }
-    
+
     const cardBtn = document.getElementById('cardCheckoutBtn');
     if (cardBtn) {
         cardBtn.addEventListener('click', (event) => {
@@ -2164,14 +2180,14 @@ window.addEventListener('DOMContentLoaded', () => {
             startCardCheckout();
         });
     }
-    
+
     // Make sure paywall is hidden on initial load
     const paywall = document.getElementById('paywallOverlay');
     if (paywall) {
         paywall.classList.add('hidden');
         paywall.style.display = 'none';
     }
-    
+
     // Hide blur overlay on initial load
     hideBlurOverlay();
     initPromoPage();
@@ -2187,7 +2203,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
+
     // Allow Enter key in transaction ID input
     const txIdInput = document.getElementById('transactionIdInput');
     if (txIdInput) {
@@ -2197,13 +2213,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
+
     // Set up close button with event listener (backup to onclick)
     const closeBtn = document.querySelector('.close-paywall');
     if (closeBtn) {
         closeBtn.addEventListener('click', closePaywall);
     }
-    
+
     // Also close paywall when clicking outside of it
     const paywallOverlay = document.getElementById('paywallOverlay');
     if (paywallOverlay) {
@@ -2214,7 +2230,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
+
     // Initialize profile menu
     initProfileMenu();
 });
@@ -2236,26 +2252,26 @@ function initProfileMenu() {
     const profileBtn = document.getElementById('profileBtn');
     const profileDropdown = document.getElementById('profileDropdown');
     const profileEmail = document.getElementById('profileEmail');
-    
+
     if (!profileBtn || !profileDropdown) return;
-    
+
     // Update profile email display and visibility
     updateProfileEmail();
     updateProfileVisibility();
-    
+
     // Toggle dropdown
     profileBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         toggleProfileDropdown();
     });
-    
+
     // Close dropdown when clicking outside
     document.addEventListener('click', (e) => {
         if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
             closeProfileDropdown();
         }
     });
-    
+
     // Close on Escape key
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
@@ -2263,33 +2279,33 @@ function initProfileMenu() {
             closeAllModals();
         }
     });
-    
+
     // Set up menu item click handlers
     const changePasswordBtn = document.getElementById('changePasswordBtn');
     const cancelSubscriptionBtn = document.getElementById('cancelSubscriptionBtn');
     const signOutBtn = document.getElementById('signOutBtn');
-    
+
     if (changePasswordBtn) {
         changePasswordBtn.addEventListener('click', () => {
             closeProfileDropdown();
             openChangePasswordModal();
         });
     }
-    
+
     if (cancelSubscriptionBtn) {
         cancelSubscriptionBtn.addEventListener('click', () => {
             closeProfileDropdown();
             openCancelSubscriptionModal();
         });
     }
-    
+
     if (signOutBtn) {
         signOutBtn.addEventListener('click', () => {
             closeProfileDropdown();
             openSignOutModal();
         });
     }
-    
+
     // Initialize modals
     initChangePasswordModal();
     initCancelSubscriptionModal();
@@ -2299,11 +2315,11 @@ function initProfileMenu() {
 function updateProfileEmail() {
     const profileEmail = document.getElementById('profileEmail');
     if (!profileEmail) return;
-    
-    const email = storage.getItem('activeUserEmail') || 
-                  storage.getItem('insiderRememberEmail') || 
-                  storage.getItem('pendingCheckoutEmail');
-    
+
+    const email = storage.getItem('activeUserEmail') ||
+        storage.getItem('insiderRememberEmail') ||
+        storage.getItem('pendingCheckoutEmail');
+
     if (email) {
         profileEmail.textContent = email;
     } else {
@@ -2314,15 +2330,15 @@ function updateProfileEmail() {
 function updateProfileVisibility() {
     const profileMenuContainer = document.getElementById('profileMenuContainer');
     if (!profileMenuContainer) return;
-    
+
     const status = getAccessStatus();
-    const hasEmail = storage.getItem('activeUserEmail') || 
-                     storage.getItem('insiderRememberEmail') || 
-                     storage.getItem('pendingCheckoutEmail');
-    
+    const hasEmail = storage.getItem('activeUserEmail') ||
+        storage.getItem('insiderRememberEmail') ||
+        storage.getItem('pendingCheckoutEmail');
+
     // Show profile menu only if user has access or has an email stored
     const shouldShow = status.isPaid || status.promoUsed || status.hasDayAccess || hasEmail;
-    
+
     if (shouldShow) {
         profileMenuContainer.classList.remove('hidden');
     } else {
@@ -2333,11 +2349,11 @@ function updateProfileVisibility() {
 function toggleProfileDropdown() {
     const profileBtn = document.getElementById('profileBtn');
     const profileDropdown = document.getElementById('profileDropdown');
-    
+
     if (!profileBtn || !profileDropdown) return;
-    
+
     const isOpen = profileDropdown.classList.contains('show');
-    
+
     if (isOpen) {
         closeProfileDropdown();
     } else {
@@ -2348,9 +2364,9 @@ function toggleProfileDropdown() {
 function openProfileDropdown() {
     const profileBtn = document.getElementById('profileBtn');
     const profileDropdown = document.getElementById('profileDropdown');
-    
+
     if (!profileBtn || !profileDropdown) return;
-    
+
     profileDropdown.classList.remove('hidden');
     // Force reflow to enable transition
     profileDropdown.offsetHeight;
@@ -2361,12 +2377,12 @@ function openProfileDropdown() {
 function closeProfileDropdown() {
     const profileBtn = document.getElementById('profileBtn');
     const profileDropdown = document.getElementById('profileDropdown');
-    
+
     if (!profileBtn || !profileDropdown) return;
-    
+
     profileDropdown.classList.remove('show');
     profileBtn.setAttribute('aria-expanded', 'false');
-    
+
     // Hide after transition
     setTimeout(() => {
         if (!profileDropdown.classList.contains('show')) {
@@ -2382,7 +2398,7 @@ function closeProfileDropdown() {
 function openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
-    
+
     modal.classList.remove('hidden');
     // Force reflow
     modal.offsetHeight;
@@ -2393,10 +2409,10 @@ function openModal(modalId) {
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
-    
+
     modal.classList.remove('show');
     document.body.style.overflow = '';
-    
+
     setTimeout(() => {
         if (!modal.classList.contains('show')) {
             modal.classList.add('hidden');
@@ -2417,26 +2433,26 @@ function closeAllModals() {
 function initChangePasswordModal() {
     const modal = document.getElementById('changePasswordModal');
     if (!modal) return;
-    
+
     const closeBtn = document.getElementById('closeChangePasswordModal');
     const cancelBtn = document.getElementById('cancelChangePassword');
     const form = document.getElementById('changePasswordForm');
-    
+
     if (closeBtn) {
         closeBtn.addEventListener('click', () => closeModal('changePasswordModal'));
     }
-    
+
     if (cancelBtn) {
         cancelBtn.addEventListener('click', () => closeModal('changePasswordModal'));
     }
-    
+
     // Close on overlay click
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
             closeModal('changePasswordModal');
         }
     });
-    
+
     if (form) {
         form.addEventListener('submit', handleChangePassword);
     }
@@ -2446,45 +2462,45 @@ function openChangePasswordModal() {
     // Reset form
     const form = document.getElementById('changePasswordForm');
     const message = document.getElementById('changePasswordMessage');
-    
+
     if (form) form.reset();
     if (message) {
         message.classList.add('hidden');
         message.className = 'form-message hidden';
     }
-    
+
     openModal('changePasswordModal');
 }
 
 function handleChangePassword(e) {
     e.preventDefault();
-    
+
     const currentPassword = document.getElementById('currentPassword').value;
     const newPassword = document.getElementById('newPassword').value;
     const confirmNewPassword = document.getElementById('confirmNewPassword').value;
     const message = document.getElementById('changePasswordMessage');
-    
+
     // Validation
     if (newPassword.length < 8) {
         showFormMessage(message, 'New password must be at least 8 characters.', 'error');
         return;
     }
-    
+
     if (newPassword !== confirmNewPassword) {
         showFormMessage(message, 'New passwords do not match.', 'error');
         return;
     }
-    
+
     // Simulate password change (in production, this would call an API)
     const submitBtn = e.target.querySelector('button[type="submit"]');
     submitBtn.textContent = 'Updating...';
     submitBtn.disabled = true;
-    
+
     setTimeout(() => {
         showFormMessage(message, 'Password updated successfully!', 'success');
         submitBtn.textContent = 'Update Password';
         submitBtn.disabled = false;
-        
+
         // Close modal after success
         setTimeout(() => {
             closeModal('changePasswordModal');
@@ -2500,23 +2516,23 @@ function handleChangePassword(e) {
 function initCancelSubscriptionModal() {
     const modal = document.getElementById('cancelSubscriptionModal');
     if (!modal) return;
-    
+
     const closeBtn = document.getElementById('closeCancelSubscriptionModal');
     const keepBtn = document.getElementById('keepSubscription');
     const confirmBtn = document.getElementById('confirmCancelSubscription');
-    
+
     if (closeBtn) {
         closeBtn.addEventListener('click', () => closeModal('cancelSubscriptionModal'));
     }
-    
+
     if (keepBtn) {
         keepBtn.addEventListener('click', () => closeModal('cancelSubscriptionModal'));
     }
-    
+
     if (confirmBtn) {
         confirmBtn.addEventListener('click', handleCancelSubscription);
     }
-    
+
     // Close on overlay click
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
@@ -2528,13 +2544,13 @@ function initCancelSubscriptionModal() {
 function openCancelSubscriptionModal() {
     const message = document.getElementById('cancelSubscriptionMessage');
     const reason = document.getElementById('cancelReason');
-    
+
     if (reason) reason.value = '';
     if (message) {
         message.classList.add('hidden');
         message.className = 'form-message hidden';
     }
-    
+
     openModal('cancelSubscriptionModal');
 }
 
@@ -2542,24 +2558,24 @@ function handleCancelSubscription() {
     const message = document.getElementById('cancelSubscriptionMessage');
     const confirmBtn = document.getElementById('confirmCancelSubscription');
     const reason = document.getElementById('cancelReason').value;
-    
+
     confirmBtn.textContent = 'Cancelling...';
     confirmBtn.disabled = true;
-    
+
     // Simulate cancellation (in production, this would call an API)
     setTimeout(() => {
         // Clear paid access
         storage.removeItem('paidAccess');
         storage.removeItem('promoUsed');
         storage.removeItem('dayAccessExpiry');
-        
+
         showFormMessage(message, 'Your subscription has been cancelled.', 'success');
         confirmBtn.textContent = 'Cancel Subscription';
         confirmBtn.disabled = false;
-        
+
         // Update UI
         updateUsageIndicator();
-        
+
         setTimeout(() => {
             closeModal('cancelSubscriptionModal');
             showSuccessNotification('Subscription cancelled. You still have access until the end of your billing period.');
@@ -2574,23 +2590,23 @@ function handleCancelSubscription() {
 function initSignOutModal() {
     const modal = document.getElementById('signOutModal');
     if (!modal) return;
-    
+
     const closeBtn = document.getElementById('closeSignOutModal');
     const cancelBtn = document.getElementById('cancelSignOut');
     const confirmBtn = document.getElementById('confirmSignOut');
-    
+
     if (closeBtn) {
         closeBtn.addEventListener('click', () => closeModal('signOutModal'));
     }
-    
+
     if (cancelBtn) {
         cancelBtn.addEventListener('click', () => closeModal('signOutModal'));
     }
-    
+
     if (confirmBtn) {
         confirmBtn.addEventListener('click', handleSignOut);
     }
-    
+
     // Close on overlay click
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
@@ -2605,10 +2621,10 @@ function openSignOutModal() {
 
 function handleSignOut() {
     const confirmBtn = document.getElementById('confirmSignOut');
-    
+
     confirmBtn.textContent = 'Signing out...';
     confirmBtn.disabled = true;
-    
+
     setTimeout(() => {
         // Clear session data
         storage.removeItem('activeUserEmail');
@@ -2622,18 +2638,18 @@ function handleSignOut() {
         storage.removeItem('bonusFreeSearches');
         storage.removeItem('promoCodesRedeemed');
         storage.removeItem('accessUpgrades');
-        
+
         // Close modal
         closeModal('signOutModal');
-        
+
         // Update UI - hide profile menu and update indicators
         updateUsageIndicator();
         updateProfileEmail();
         updateProfileVisibility();
-        
+
         // Show notification
         showSuccessNotification('You have been signed out.');
-        
+
         // Stay on the same page (index.html) - profile menu will be hidden
     }, 1000);
 }
@@ -2644,7 +2660,7 @@ function handleSignOut() {
 
 function showFormMessage(element, text, type) {
     if (!element) return;
-    
+
     element.textContent = text;
     element.className = `form-message ${type}`;
     element.classList.remove('hidden');
