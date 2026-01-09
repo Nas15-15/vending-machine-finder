@@ -1,51 +1,77 @@
 :root {
-  /* Trust & Sales Boosting Color Palette */
-  /* Blue - Trust, Reliability (Primary) */
-  --gradient-start: #2563eb;
-  --gradient-end: #1e40af;
-  --accent-primary: #1e40af;
-  --accent-primary-light: #3b82f6;
-  --accent-primary-dark: #1e3a8a;
-  
-  /* Orange - Energy, Sales, Dopamine (CTAs) */
+  /* Dark Theme Color Palette - SaaS Dashboard */
+
+  /* Background Colors */
+  --bg-primary: #09090b;
+  /* zinc-950 - Main background */
+  --bg-secondary: #18181b;
+  /* zinc-900 - Cards/panels */
+  --bg-tertiary: #27272a;
+  /* zinc-800 - Elevated elements */
+  --bg-hover: #3f3f46;
+  /* zinc-700 - Hover states */
+
+  /* Text Colors */
+  --text-primary: #fafafa;
+  /* zinc-100 - Headers/primary text */
+  --text-secondary: #a1a1aa;
+  /* zinc-400 - Secondary text */
+  --text-muted: #71717a;
+  /* zinc-500 - Muted/disabled text */
+
+  /* Accent Colors - Trust & Sales */
+  --accent-primary: #3b82f6;
+  /* Blue - Trust, Reliability */
+  --accent-primary-light: #60a5fa;
+  --accent-primary-dark: #2563eb;
+
   --accent-secondary: #f97316;
+  /* Orange - CTAs, Energy */
   --accent-secondary-light: #fb923c;
   --accent-secondary-dark: #ea580c;
-  
-  /* Green - Growth, Positive Emotions */
-  --success-color: #10b981;
-  --success-light: #34d399;
-  --success-dark: #059669;
-  
-  /* Yellow - Optimism, Attention */
-  --highlight-color: #fbbf24;
-  --highlight-light: #fcd34d;
-  
-  /* Purple - Luxury, Creativity */
-  --luxury-color: #8b5cf6;
-  
-  /* Text Colors */
-  --text-light: #ffffff;
-  --text-dark: #1e293b;
-  --text-muted: #475569;
-  --text-secondary: #64748b;
-  
-  /* Backgrounds - Light & Trustworthy */
-  --surface-card: rgba(255, 255, 255, 0.95);
-  --surface-glass: rgba(37, 99, 235, 0.08);
-  --bg-light: #f0f9ff;
-  --bg-primary: #e0f2fe;
-  
-  /* Borders */
-  --border-color: #cbd5e1;
-  --border-light: #e2e8f0;
-  
-  --radius-pill: 999px;
-  --radius-lg: 18px;
-  --radius-md: 12px;
-  --shadow-soft: 0 10px 30px rgba(37, 99, 235, 0.15);
-  --shadow-strong: 0 20px 45px rgba(37, 99, 235, 0.25);
-  color-scheme: light;
+
+  /* Status Colors */
+  --success-color: #22c55e;
+  --success-light: #4ade80;
+  --success-dark: #16a34a;
+
+  --warning-color: #eab308;
+  --warning-light: #facc15;
+
+  --error-color: #ef4444;
+  --error-light: #f87171;
+
+  /* Border Colors */
+  --border-color: #27272a;
+  /* zinc-800 */
+  --border-light: #3f3f46;
+  /* zinc-700 */
+  --border-accent: rgba(59, 130, 246, 0.3);
+
+  /* Shadows for Dark Mode */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 9999px;
+
+  /* Sidebar */
+  --sidebar-width: 280px;
+  --sidebar-collapsed-width: 72px;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 200ms ease;
+  --transition-slow: 300ms ease;
+
+  color-scheme: dark;
 }
 
 *,
@@ -56,14 +82,22 @@
   box-sizing: border-box;
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0f9ff 100%);
-  min-height: 100vh;
-  padding: 20px;
-  color: #1e293b;
-  line-height: 1.6;
+html {
+  scroll-behavior: smooth;
 }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background: var(--bg-primary);
+  min-height: 100vh;
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Google Fonts - Inter */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 img {
   max-width: 100%;
@@ -72,14 +106,92 @@ img {
 
 a {
   color: inherit;
+  text-decoration: none;
 }
 
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+/* App Layout - Sidebar + Main Content */
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  padding: 24px 32px;
+  min-height: 100vh;
+  transition: margin-left var(--transition-base);
+}
+
+.main-content.sidebar-collapsed {
+  margin-left: var(--sidebar-collapsed-width);
+}
+
+/* Container */
 .container {
   max-width: 1400px;
   margin: 0 auto;
 }
 
+/* Hidden utility */
 .hidden {
   display: none !important;
 }
 
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--bg-hover);
+}
+
+/* Selection */
+::selection {
+  background: var(--accent-primary);
+  color: white;
+}
+
+/* Focus States */
+:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* Mobile responsive */
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: 0;
+    padding: 16px 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 12px 16px;
+    padding-bottom: 80px;
+    /* Space for mobile nav */
+  }
+}

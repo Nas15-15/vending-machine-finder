@@ -224,11 +224,12 @@ app.post('/api/logout', (req, res) => {
   res.json({ ok: true });
 });
 
-app.post('/api/waitlist', async (req, res) => {
-  const { name, email, company, fleetSize, goals } = req.body || {};
+// Simple email-only login for returning users
+app.post('/api/login-email', async (req, res) => {
+  const { email } = req.body || {};
   const normalizedEmail = normalizeEmail(email);
-  if (!name || !normalizedEmail || !company) {
-    return res.status(400).json({ error: 'Name, email, and company are required' });
+  if (!normalizedEmail) {
+    return res.status(400).json({ error: 'Email is required' });
   }
 
   // Check if account is banned
@@ -243,39 +244,98 @@ app.post('/api/waitlist', async (req, res) => {
   const clientInfo = getClientInfo(req);
   const location = await getLocationFromIP(clientInfo.ip);
 
-  // Add to waitlist
-  await addWaitlistEntry({
-    name: name.trim(),
+  // Create session for the user
+  const role = 'member';
+  const token = createToken({ email: normalizedEmail, role });
+  res.cookie('vmf_session', token, cookieOptions);
+
+  await recordLoginEvent({
     email: normalizedEmail,
-    company: company.trim(),
-    fleetSize: (fleetSize || '').trim(),
-    goals: (goals || '').trim(),
+    role,
+    method: 'email_login',
     ...clientInfo,
     ...location
   });
 
-  // Grant 25 free searches immediately upon signup
-  await grantFreeSearches(normalizedEmail, 25);
+  // Get current credit status
+  const credits = await getCreditStatus(normalizedEmail);
 
-  // Check for suspicious IP activity
-  const accountsFromIP = await getAccountsByIP(clientInfo.ip);
-  if (accountsFromIP.length >= 3) {
-    await recordSuspiciousIP(clientInfo.ip, accountsFromIP.length);
+  res.json({
+    success: true,
+    email: normalizedEmail,
+    role,
+    freeSearchesRemaining: credits.freeSearches
+  });
+});
+
+app.post('/api/waitlist', async (req, res) => {
+  const { name, email, company, fleetSize, goals } = req.body || {};
+  const normalizedEmail = normalizeEmail(email);
+  if (!name || !normalizedEmail) {
+    return res.status(400).json({ error: 'Name and email are required' });
   }
 
-  // Automatically log the user in by creating a session
+  // Check if account is banned
+  const banned = await isBanned(normalizedEmail);
+  if (banned) {
+    return res.status(403).json({
+      error: 'Account access has been restricted',
+      code: 'account_banned'
+    });
+  }
+
+  const clientInfo = getClientInfo(req);
+  const location = await getLocationFromIP(clientInfo.ip);
+
+  // Check if this email already has an account (credits record exists)
+  const existingCredits = await getCreditStatus(normalizedEmail);
+  const isNewAccount = !existingCredits.welcomeGranted && existingCredits.freeSearches === 0 && existingCredits.dayAccessExpiry === 0;
+
+  if (isNewAccount) {
+    // New account: add to waitlist and grant free searches
+    await addWaitlistEntry({
+      name: name.trim(),
+      email: normalizedEmail,
+      company: (company || '').trim(),
+      fleetSize: (fleetSize || '').trim(),
+      goals: (goals || '').trim(),
+      ...clientInfo,
+      ...location
+    });
+
+    // Grant 25 free searches only for new accounts
+    await grantFreeSearches(normalizedEmail, 25);
+
+    // Check for suspicious IP activity
+    const accountsFromIP = await getAccountsByIP(clientInfo.ip);
+    if (accountsFromIP.length >= 3) {
+      await recordSuspiciousIP(clientInfo.ip, accountsFromIP.length);
+    }
+  }
+
+  // Log the user in (works for both new and existing accounts)
   const role = 'member';
   const token = createToken({ email: normalizedEmail, role });
   res.cookie('vmf_session', token, cookieOptions);
   await recordLoginEvent({
     email: normalizedEmail,
     role,
-    method: 'signup',
+    method: isNewAccount ? 'signup' : 'login_via_signup',
     ...clientInfo,
     ...location
   });
 
-  res.json({ success: true, freeSearchesGranted: 25, email: normalizedEmail, role });
+  // Get current credit status to return accurate count
+  const currentCredits = await getCreditStatus(normalizedEmail);
+
+  res.json({
+    success: true,
+    freeSearchesGranted: isNewAccount ? 25 : 0,
+    freeSearchesRemaining: currentCredits.freeSearches,
+    isNewAccount,
+    email: normalizedEmail,
+    role
+  });
 });
 
 app.get('/api/access-status', async (req, res) => {

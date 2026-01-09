@@ -798,15 +798,21 @@ function refreshMapView(options = {}) {
         }
     }
 
-    const raf = (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function')
-        ? window.requestAnimationFrame.bind(window)
-        : (cb) => setTimeout(cb, 16);
-
-    raf(() => {
+    // Call invalidateSize multiple times with increasing delays
+    // This ensures tiles load properly even if container layout isn't finished
+    const invalidateMap = () => {
         if (map && typeof map.invalidateSize === 'function') {
-            map.invalidateSize();
+            map.invalidateSize({ animate: false });
         }
-    });
+    };
+
+    // Immediate call
+    invalidateMap();
+
+    // Delayed calls to handle layout settling
+    setTimeout(invalidateMap, 100);
+    setTimeout(invalidateMap, 300);
+    setTimeout(invalidateMap, 600);
 }
 
 // Get coordinates from location input
@@ -981,7 +987,7 @@ function isGenericName(name, category) {
     return readableCategory && normalizedName === readableCategory;
 }
 
-function buildLocationNameFromTags(tags = {}, category) {
+function buildLocationNameFromTags(tags = {}, category, lat = null, lon = null) {
     const candidateKeys = [
         'name',
         'name:en',
@@ -1006,20 +1012,36 @@ function buildLocationNameFromTags(tags = {}, category) {
     const street = tags['addr:street'] || tags['addr:road'];
     const housenumber = tags['addr:housenumber'];
     const city = tags['addr:city'] || tags['addr:town'] || tags['addr:village'];
+    const neighborhood = tags['addr:neighbourhood'] || tags['addr:suburb'];
     const descriptor = formatCategoryLabel(category);
 
+    // Try to build a descriptive name with available address components
     if (street && city) {
         const streetLine = housenumber ? `${housenumber} ${street}` : street;
-        return `${descriptor} near ${streetLine}, ${city}`;
+        return `${descriptor} at ${streetLine}, ${city}`;
+    }
+
+    if (street && neighborhood) {
+        const streetLine = housenumber ? `${housenumber} ${street}` : street;
+        return `${descriptor} at ${streetLine}, ${neighborhood}`;
     }
 
     if (city) {
         return `${descriptor} in ${city}`;
     }
 
+    if (neighborhood) {
+        return `${descriptor} in ${neighborhood}`;
+    }
+
     if (street) {
         const streetLine = housenumber ? `${housenumber} ${street}` : street;
         return `${descriptor} on ${streetLine}`;
+    }
+
+    // If no address info, include coordinates for uniqueness
+    if (lat !== null && lon !== null) {
+        return `${descriptor} (${lat.toFixed(4)}, ${lon.toFixed(4)})`;
     }
 
     return descriptor;
@@ -1229,7 +1251,7 @@ async function findHighTrafficLocations(centerLat, centerLon, radius = DEFAULT_S
                                 category = categoryMap[category] || category;
 
                                 const readableCategory = formatCategoryLabel(category);
-                                const derivedName = buildLocationNameFromTags(tags, category);
+                                const derivedName = buildLocationNameFromTags(tags, category, lat, lon);
                                 const derivedAddress = buildAddressFromTags(tags);
                                 const typeLabel = formatCategoryLabel(tags.amenity || tags.shop || tags.aeroway || tags.railway || tags.leisure || category);
                                 const ownerName = tags.operator || tags.owner || tags.brand || '';
@@ -1986,8 +2008,15 @@ async function performSearch() {
         // Geocode the input location
         const geocoded = await geocodeLocation(locationInput);
 
+        // Add to recent searches
+        addRecentSearch(geocoded, locationInput);
+
+        // Hide empty state when searching
+        hideEmptyState();
+
         // Initialize map at location
         initMap([geocoded.lat, geocoded.lon]);
+
 
         // Update loading message
         const loadingEl = document.getElementById('loadingIndicator');
@@ -2665,4 +2694,231 @@ function showFormMessage(element, text, type) {
     element.className = `form-message ${type}`;
     element.classList.remove('hidden');
 }
+
+// =============================================
+// Sidebar Navigation
+// =============================================
+
+function initSidebar() {
+    const toggle = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const logoutBtn = document.getElementById('sidebarLogoutBtn');
+
+    if (toggle && sidebar && overlay) {
+        toggle.addEventListener('click', () => {
+            sidebar.classList.toggle('mobile-open');
+            overlay.classList.toggle('active');
+        });
+
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('mobile-open');
+            overlay.classList.remove('active');
+        });
+    }
+
+    // Update sidebar user info
+    updateSidebarUser();
+
+    // Logout button
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            if (confirm('Sign out of your account?')) {
+                handleSignOut();
+            }
+        });
+    }
+}
+
+function updateSidebarUser() {
+    const nameEl = document.getElementById('sidebarUserName');
+    const emailEl = document.getElementById('sidebarUserEmail');
+
+    if (!nameEl || !emailEl) return;
+
+    const email = storage.getItem('activeUserEmail') ||
+        storage.getItem('insiderRememberEmail') ||
+        storage.getItem('pendingCheckoutEmail');
+
+    if (email) {
+        nameEl.textContent = email.split('@')[0];
+        emailEl.textContent = email;
+    } else {
+        nameEl.textContent = 'Guest User';
+        emailEl.textContent = 'Not signed in';
+    }
+}
+
+// =============================================
+// Recent Searches
+// =============================================
+
+const RECENT_SEARCHES_KEY = 'recentSearches';
+const MAX_RECENT_SEARCHES = 6;
+
+function getRecentSearches() {
+    try {
+        const saved = storage.getItem(RECENT_SEARCHES_KEY);
+        return saved ? JSON.parse(saved) : [];
+    } catch (error) {
+        console.error('Failed to load recent searches:', error);
+        return [];
+    }
+}
+
+function addRecentSearch(location, query) {
+    const searches = getRecentSearches();
+
+    // Remove duplicates
+    const filtered = searches.filter(s => s.query.toLowerCase() !== query.toLowerCase());
+
+    // Add new search at the beginning
+    filtered.unshift({
+        query: query,
+        lat: location.lat,
+        lon: location.lon,
+        displayName: location.displayName || query,
+        timestamp: new Date().toISOString()
+    });
+
+    // Limit to max
+    const limited = filtered.slice(0, MAX_RECENT_SEARCHES);
+
+    storage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(limited));
+    renderRecentSearches();
+}
+
+function clearRecentSearches() {
+    storage.removeItem(RECENT_SEARCHES_KEY);
+    renderRecentSearches();
+}
+
+function renderRecentSearches() {
+    const grid = document.getElementById('recentSearchesGrid');
+    const noRecent = document.getElementById('noRecentSearches');
+    const clearBtn = document.getElementById('clearRecentBtn');
+
+    if (!grid) return;
+
+    const searches = getRecentSearches();
+
+    if (searches.length === 0) {
+        grid.innerHTML = '';
+        if (noRecent) noRecent.classList.remove('hidden');
+        if (clearBtn) clearBtn.style.display = 'none';
+        return;
+    }
+
+    if (noRecent) noRecent.classList.add('hidden');
+    if (clearBtn) clearBtn.style.display = 'inline';
+
+    grid.innerHTML = searches.map(search => `
+        <div class="suggestion-card" data-query="${search.query}" data-lat="${search.lat}" data-lon="${search.lon}">
+            <div class="suggestion-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+            </div>
+            <h4 class="suggestion-card-title">${search.query}</h4>
+            <span class="suggestion-card-meta">${formatTimeAgo(search.timestamp)}</span>
+        </div>
+    `).join('');
+
+    // Add click handlers
+    grid.querySelectorAll('.suggestion-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const query = card.dataset.query;
+            const locationInput = document.getElementById('locationInput');
+            if (locationInput) {
+                locationInput.value = query;
+                performSearch();
+            }
+        });
+    });
+}
+
+function formatTimeAgo(timestamp) {
+    const now = new Date();
+    const then = new Date(timestamp);
+    const diffMs = now - then;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return then.toLocaleDateString();
+}
+
+function initRecentSearches() {
+    renderRecentSearches();
+
+    // Clear button handler
+    const clearBtn = document.getElementById('clearRecentBtn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (confirm('Clear all recent searches?')) {
+                clearRecentSearches();
+            }
+        });
+    }
+}
+
+// =============================================
+// Trending Areas
+// =============================================
+
+function initTrendingAreas() {
+    const badges = document.querySelectorAll('.trending-badge');
+
+    badges.forEach(badge => {
+        badge.addEventListener('click', () => {
+            const location = badge.dataset.location;
+            const locationInput = document.getElementById('locationInput');
+            if (locationInput && location) {
+                locationInput.value = location;
+                performSearch();
+            }
+        });
+    });
+}
+
+// =============================================
+// Empty State Management
+// =============================================
+
+function showEmptyState() {
+    const emptyState = document.getElementById('emptyState');
+    const resultsSection = document.getElementById('resultsSection');
+
+    if (emptyState) emptyState.classList.remove('hidden');
+    if (resultsSection) resultsSection.classList.add('hidden');
+}
+
+function hideEmptyState() {
+    const emptyState = document.getElementById('emptyState');
+    if (emptyState) emptyState.classList.add('hidden');
+}
+
+// =============================================
+// Dashboard Initialization
+// =============================================
+
+function initDashboard() {
+    initSidebar();
+    initRecentSearches();
+    initTrendingAreas();
+
+    // Show empty state initially
+    showEmptyState();
+}
+
+// Call initDashboard when DOM is ready
+window.addEventListener('DOMContentLoaded', () => {
+    initDashboard();
+});
 

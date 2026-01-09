@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy Vending Machines - VendingSpot</title>
+    <meta name="description"
+        content="Shop premium vending machines for your business. Quality machines at competitive prices.">
+    <link rel="stylesheet" href="/src/styles/main.css">
+</head>
+
+<body class="app-body">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                        <circle cx="12" cy="10" r="3" />
+                    </svg>
+                </div>
+                <div class="sidebar-logo-text">
+                    <span class="sidebar-logo-title">VendingSpot</span>
+                    <span class="sidebar-logo-subtitle">Location Finder</span>
+                </div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="sidebar-nav-section">
+                <span class="sidebar-nav-label">Menu</span>
+                <ul class="sidebar-nav-list">
+                    <li class="sidebar-nav-item">
+                        <a href="index.html" class="sidebar-nav-link">
+                            <svg class="sidebar-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <rect x="3" y="3" width="7" height="9" />
+                                <rect x="14" y="3" width="7" height="5" />
+                                <rect x="14" y="12" width="7" height="9" />
+                                <rect x="3" y="16" width="7" height="5" />
+                            </svg>
+                            <span class="sidebar-nav-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="saved-locations.html" class="sidebar-nav-link">
+                            <svg class="sidebar-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                            </svg>
+                            <span class="sidebar-nav-text">Saved Locations</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="buy-machines.html" class="sidebar-nav-link active">
+                            <svg class="sidebar-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <rect x="2" y="4" width="20" height="16" rx="2" />
+                                <path d="M7 15h0M2 9.5h20" />
+                            </svg>
+                            <span class="sidebar-nav-text">Buy Machines</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="settings.html" class="sidebar-nav-link">
+                            <svg class="sidebar-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="12" cy="12" r="3" />
+                                <path
+                                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                            </svg>
+                            <span class="sidebar-nav-text">Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-user" id="sidebarUser">
+                <div class="sidebar-user-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <div class="sidebar-user-info">
+                    <span class="sidebar-user-name" id="sidebarUserName">Guest User</span>
+                    <span class="sidebar-user-email" id="sidebarUserEmail">Not signed in</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Mobile Toggle -->
+    <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+    </button>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-nav">
+        <ul class="mobile-nav-list">
+            <li><a href="index.html" class="mobile-nav-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="9" />
+                        <rect x="14" y="3" width="7" height="5" />
+                        <rect x="14" y="12" width="7" height="9" />
+                        <rect x="3" y="16" width="7" height="5" />
+                    </svg><span>Dashboard</span>
+                </a></li>
+            <li><a href="saved-locations.html" class="mobile-nav-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                    </svg><span>Saved</span>
+                </a></li>
+            <li><a href="buy-machines.html" class="mobile-nav-link active">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="4" width="20" height="16" rx="2" />
+                        <path d="M7 15h0M2 9.5h20" />
+                    </svg><span>Shop</span>
+                </a></li>
+            <li><a href="settings.html" class="mobile-nav-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3" />
+                    </svg><span>Settings</span>
+                </a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <header class="dashboard-header">
+                <h1 class="dashboard-title">Buy Vending Machines</h1>
+                <p class="dashboard-subtitle">Quality machines to start or expand your vending business</p>
+            </header>
+
+            <!-- Featured Banner -->
+            <div class="featured-banner">
+                <div class="featured-content">
+                    <span class="featured-badge">Featured</span>
+                    <h2>Start Your Vending Empire</h2>
+                    <p>Get high-quality, refurbished vending machines at competitive prices. All machines come with
+                        warranty and support.</p>
+                </div>
+                <div class="featured-stats">
+                    <div class="featured-stat">
+                        <span class="featured-stat-value">500+</span>
+                        <span class="featured-stat-label">Machines Sold</span>
+                    </div>
+                    <div class="featured-stat">
+                        <span class="featured-stat-value">4.8★</span>
+                        <span class="featured-stat-label">Customer Rating</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Filter -->
+            <div class="category-filter">
+                <button class="category-btn active" data-category="all">All Machines</button>
+                <button class="category-btn" data-category="snack">Snack</button>
+                <button class="category-btn" data-category="beverage">Beverage</button>
+                <button class="category-btn" data-category="combo">Combo</button>
+                <button class="category-btn" data-category="specialty">Specialty</button>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="products-grid" id="productsGrid">
+                <!-- Product cards will be rendered here -->
+            </div>
+        </div>
+    </main>
+
+    <style>
+        .featured-banner {
+            background: linear-gradient(135deg, var(--accent-primary-dark) 0%, var(--accent-primary) 100%);
+            border-radius: var(--radius-xl);
+            padding: 32px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            gap: 32px;
+            flex-wrap: wrap;
+        }
+
+        .featured-content {
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .featured-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 6px 12px;
+            border-radius: var(--radius-pill);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 12px;
+        }
+
+        .featured-content h2 {
+            color: white;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .featured-content p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .featured-stats {
+            display: flex;
+            gap: 32px;
+        }
+
+        .featured-stat {
+            text-align: center;
+        }
+
+        .featured-stat-value {
+            display: block;
+            font-size: 2rem;
+            font-weight: 800;
+            color: white;
+        }
+
+        .featured-stat-label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .category-filter {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .category-btn {
+            padding: 10px 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-pill);
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .category-btn:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .category-btn.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .product-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: all var(--transition-base);
+        }
+
+        .product-card:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 220px;
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-image-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-muted);
+        }
+
+        .product-image-placeholder svg {
+            width: 48px;
+            height: 48px;
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: var(--accent-secondary);
+            color: white;
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .product-badge.new {
+            background: var(--success-color);
+        }
+
+        .product-badge.popular {
+            background: var(--accent-secondary);
+        }
+
+        .product-content {
+            padding: 20px;
+        }
+
+        .product-category {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent-primary-light);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .product-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .product-description {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .product-specs {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .product-spec {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .product-spec svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .product-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .product-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .product-price-note {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .buy-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--accent-secondary), var(--accent-secondary-dark));
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all var(--transition-fast);
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+        }
+
+        .buy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
+        }
+
+        .buy-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .featured-banner {
+                padding: 24px;
+            }
+
+            .featured-stats {
+                width: 100%;
+                justify-content: space-around;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <script>
+        // Product data
+        const products = [
+            {
+                id: 1,
+                title: "AMS 39 VMC Snack Machine",
+                category: "snack",
+                description: "High-capacity snack machine with 39 selections. Perfect for offices and schools.",
+                price: 2995,
+                specs: ["39 Selections", "Energy Efficient", "ADA Compliant"],
+                badge: "popular",
+                image: null
+            },
+            {
+                id: 2,
+                title: "Dixie Narco 501E Beverage",
+                category: "beverage",
+                description: "Premium cold beverage machine. Holds up to 501 cans/bottles. Industrial cooling system.",
+                price: 3495,
+                specs: ["501 Capacity", "LED Display", "Credit Card Ready"],
+                badge: "new",
+                image: null
+            },
+            {
+                id: 3,
+                title: "Seaga HY900 Combo Machine",
+                category: "combo",
+                description: "Best-selling combo machine. Snacks and beverages in one unit. Space-efficient design.",
+                price: 4295,
+                specs: ["29 Snack + 9 Drink", "Touch Screen", "Warranty Included"],
+                badge: "popular",
+                image: null
+            },
+            {
+                id: 4,
+                title: "USI 3185 Snack Merchandiser",
+                category: "snack",
+                description: "Compact yet high-capacity snack vending. Ideal for breakrooms and waiting areas.",
+                price: 2495,
+                specs: ["32 Selections", "Compact Size", "Easy Maintenance"],
+                badge: null,
+                image: null
+            },
+            {
+                id: 5,
+                title: "Vendo 721 Beverage Vendor",
+                category: "beverage",
+                description: "Classic beverage vending solution. Reliable performance with modern upgrades.",
+                price: 2795,
+                specs: ["9 Selections", "Fast Cooling", "Low Power"],
+                badge: null,
+                image: null
+            },
+            {
+                id: 6,
+                title: "Vendlife Fresh Food Machine",
+                category: "specialty",
+                description: "Refrigerated fresh food vending. Sandwiches, salads, and healthy options.",
+                price: 5995,
+                specs: ["Temperature Control", "HACCP Ready", "Custom Branding"],
+                badge: "new",
+                image: null
+            },
+            {
+                id: 7,
+                title: "AP 7600 Combo Unit",
+                category: "combo",
+                description: "Large capacity combo machine for high-traffic locations. Dual-zone temperature.",
+                price: 4795,
+                specs: ["45 Selections", "Dual Zone", "Cashless Payment"],
+                badge: null,
+                image: null
+            },
+            {
+                id: 8,
+                title: "Coffee Vending System Pro",
+                category: "specialty",
+                description: "Premium hot beverage station. Fresh-brewed coffee, tea, and hot chocolate.",
+                price: 6495,
+                specs: ["12 Drinks", "Bean-to-Cup", "Touchless"],
+                badge: "popular",
+                image: null
+            }
+        ];
+
+        let currentCategory = 'all';
+
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid');
+            const filtered = currentCategory === 'all'
+                ? products
+                : products.filter(p => p.category === currentCategory);
+
+            grid.innerHTML = filtered.map(product => `
+                <div class="product-card" data-category="${product.category}">
+                    <div class="product-image">
+                        ${product.badge ? `<span class="product-badge ${product.badge}">${product.badge}</span>` : ''}
+                        <div class="product-image-placeholder">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <rect x="4" y="2" width="16" height="20" rx="2" />
+                                <line x1="8" y1="6" x2="16" y2="6" />
+                                <line x1="8" y1="10" x2="16" y2="10" />
+                                <rect x1="8" y1="14" width="8" height="4" />
+                            </svg>
+                            <span>Machine Image</span>
+                        </div>
+                    </div>
+                    <div class="product-content">
+                        <span class="product-category">${product.category}</span>
+                        <h3 class="product-title">${product.title}</h3>
+                        <p class="product-description">${product.description}</p>
+                        <div class="product-specs">
+                            ${product.specs.map(spec => `
+                                <span class="product-spec">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg>
+                                    ${spec}
+                                </span>
+                            `).join('')}
+                        </div>
+                        <div class="product-footer">
+                            <div>
+                                <span class="product-price">$${product.price.toLocaleString()}</span>
+                                <span class="product-price-note">+ shipping</span>
+                            </div>
+                            <button class="buy-btn" onclick="alert('Contact sales for this machine: ${product.title}')">
+                                Buy Now
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M5 12h14M12 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Category filter
+        document.querySelector('.category-filter').addEventListener('click', (e) => {
+            if (e.target.classList.contains('category-btn')) {
+                document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                currentCategory = e.target.dataset.category;
+                renderProducts();
+            }
+        });
+
+        // Sidebar toggle
+        document.getElementById('sidebarToggle')?.addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        });
+
+        document.getElementById('sidebarOverlay')?.addEventListener('click', () => {
+            document.getElementById('sidebar').classList.remove('mobile-open');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        });
+
+        // Update sidebar user info
+        function updateSidebarUser() {
+            const nameEl = document.getElementById('sidebarUserName');
+            const emailEl = document.getElementById('sidebarUserEmail');
+
+            if (!nameEl || !emailEl) return;
+
+            const email = localStorage.getItem('activeUserEmail') ||
+                localStorage.getItem('insiderRememberEmail') ||
+                localStorage.getItem('pendingCheckoutEmail') ||
+                sessionStorage.getItem('activeUserEmail');
+
+            if (email) {
+                nameEl.textContent = email.split('@')[0];
+                emailEl.textContent = email;
+            } else {
+                nameEl.textContent = 'Guest User';
+                emailEl.textContent = 'Not signed in';
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderProducts();
+            updateSidebarUser();
+        });
+    </script>
+</body>
+
+</html>

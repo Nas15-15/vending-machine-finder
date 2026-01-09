@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Log in to your Vending Machine Finder account to access location intelligence and find the best spots for your vending machines.">
+    <title>Log In - Vending Machine Finder</title>
+    <link rel="stylesheet" href="/src/styles/main.css">
+    <link rel="stylesheet" href="/src/styles/login.css">
+</head>
+
+<body class="login-page">
+    <div class="login-wrapper">
+        <!-- Ambient glow effect -->
+        <div class="ambient-glow"></div>
+
+        <div class="login-card">
+            <a class="back-link" href="index.html">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+                Back
+            </a>
+
+            <div class="login-content">
+                <div class="login-header">
+                    <div class="logo-mark">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                            <circle cx="12" cy="10" r="3" />
+                        </svg>
+                    </div>
+                    <h1>Welcome back</h1>
+                    <p>Sign in to continue finding perfect locations</p>
+                </div>
+
+                <form id="loginForm" novalidate>
+                    <div class="input-wrapper">
+                        <input id="email" name="email" type="email" placeholder="Enter your email" required
+                            autocomplete="email">
+                        <div class="input-glow"></div>
+                    </div>
+                    <button id="loginSubmit" type="submit">
+                        <span>Continue</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </form>
+
+                <div id="formSuccess" class="success-message hidden" role="status" aria-live="polite">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                        <polyline points="22 4 12 14.01 9 11.01" />
+                    </svg>
+                    <span>Success! Redirecting...</span>
+                </div>
+
+                <p class="signup-prompt">
+                    New here? <a href="signup.html">Create an account</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/src/pages/login.js"></script>
+</body>
+
+</html>

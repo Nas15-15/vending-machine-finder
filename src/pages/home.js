@@ -41,27 +41,54 @@ async function hydrateSessionUi() {
   const dashboardSection = document.getElementById('dashboardSection');
   const topNav = document.querySelector('.top-nav');
   const authCtas = document.querySelector('.cta-button-row');
+  const body = document.body;
+
+  // Sidebar user elements
+  const sidebarUserName = document.getElementById('sidebarUserName');
+  const sidebarUserEmail = document.getElementById('sidebarUserEmail');
 
   const session = await loadSession();
 
   if (session?.active) {
-    // User is logged in
+    // User is logged in - show dashboard
     profileMenu?.classList.remove('hidden');
     landingSection?.classList.add('hidden');
     dashboardSection?.classList.remove('hidden');
     authCtas?.classList.add('hidden');
+    body.classList.remove('landing-active');
 
     const emailLabel = document.getElementById('profileEmail');
     if (emailLabel) {
       emailLabel.textContent = session.email;
     }
+
+    // Update sidebar user display
+    if (sidebarUserName) {
+      sidebarUserName.textContent = session.email?.split('@')[0] || 'User';
+    }
+    if (sidebarUserEmail) {
+      sidebarUserEmail.textContent = session.email || '';
+    }
   } else {
-    // Visitor view
+    // Visitor view - show landing
     profileMenu?.classList.add('hidden');
     landingSection?.classList.remove('hidden');
     dashboardSection?.classList.add('hidden');
     authCtas?.classList.remove('hidden');
+    body.classList.add('landing-active');
+
+    // Reset sidebar user display
+    if (sidebarUserName) {
+      sidebarUserName.textContent = 'Guest User';
+    }
+    if (sidebarUserEmail) {
+      sidebarUserEmail.textContent = 'Not signed in';
+    }
   }
+
+  // Reveal the page now that we know which view to show
+  body.classList.remove('app-loading');
+  body.classList.add('app-ready');
 }
 
 function initEmailInputs() {
@@ -350,7 +377,10 @@ function initFeaturesCta() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // Determine which view to show FIRST to avoid flash of wrong content
+  await hydrateSessionUi();
+
   attachGlobalErrorHandler();
   initMap();
   initSearchForm();
@@ -359,7 +389,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initLogoutButton();
   initStartSearchBtn();
   initEmailInputs();
-  hydrateSessionUi();
   initROICalculator();
   initComparisonTool();
   initExportPanel();

@@ -5,28 +5,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vending Machine Spot Finder</title>
+    <style>
+        /* Critical CSS to prevent flash of wrong content */
+        body.app-loading {
+            opacity: 0;
+        }
+
+        body.app-ready {
+            opacity: 1;
+            transition: opacity 0.15s ease;
+        }
+    </style>
     <link rel="stylesheet" href="/src/styles/main.css">
     <link rel="stylesheet" href="/src/styles/landing.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://js.stripe.com/v3/"></script>
 </head>
 
-<body class="home-body landing-active">
+<body class="home-body app-loading">
     <div class="container">
         <header class="top-header">
             <div class="top-nav">
-                <div class="profile-menu-container hidden" id="profileMenuContainer">
-                    <div class="profile-inline">
-                        <div class="profile-avatar">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="12" cy="7" r="4"></circle>
-                            </svg>
-                        </div>
-                        <span id="profileEmail">Account</span>
-                    </div>
-                    <button class="ghost-cta" id="logoutBtn" type="button">Sign out</button>
-                </div>
+
 
                 <div id="ownerControlPill" class="owner-control-pill hidden" aria-live="polite">
                     <span>Owner access active</span>
@@ -167,94 +167,295 @@
             </section>
         </div>
 
-        <div id="dashboardSection" class="hidden">
-            <div class="header-content">
-                <h1>Vending Machine Location Finder</h1>
-                <p class="subtitle">Find optimal locations for your vending machine business</p>
-            </div>
-
-            </header>
-
-            <div class="search-section">
-                <form id="searchForm" class="search-box" novalidate>
-                    <input type="text" id="locationInput" placeholder="Enter zip code, area code, city, or state..."
-                        autocomplete="off" required>
-                    <input type="email" id="searchEmailInput"
-                        placeholder="Email (optional - sign up for 5 free searches)" autocomplete="email">
-                    <button id="searchBtn" class="search-btn" type="button">
-                        <span>Search</span>
-                        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <path d="m21 21-4.35-4.35"></path>
-                        </svg>
-                    </button>
-                </form>
-                <div class="search-options">
-                    <label>
-                        <input type="checkbox" id="highTrafficOnly" checked>
-                        High traffic areas only
-                    </label>
-                    <label>
-                        <input type="checkbox" id="excludeExisting" checked>
-                        Exclude areas with existing vending machines
-                    </label>
-                    <button id="advancedFiltersToggle" class="advanced-filters-btn" type="button">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                        </svg>
-                        Advanced Filters
-                        <span id="filterBadge" class="filter-badge hidden">0</span>
-                    </button>
+        <div id="dashboardSection" class="dashboard-wrapper hidden">
+            <!-- Sidebar Navigation -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-logo">
+                        <div class="sidebar-logo-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                <circle cx="12" cy="10" r="3" />
+                            </svg>
+                        </div>
+                        <div class="sidebar-logo-text">
+                            <span class="sidebar-logo-title">VendingSpot</span>
+                            <span class="sidebar-logo-subtitle">Location Finder</span>
+                        </div>
+                    </div>
                 </div>
 
-                <div id="advancedFiltersPanel" class="advanced-filters-panel hidden">
-                    <h3>Advanced Filters</h3>
-                    <div class="filters-grid">
-                        <div class="filter-group">
-                            <label for="filterMinScore">Minimum Overall Score</label>
-                            <input type="number" id="filterMinScore" min="0" max="100" step="5" placeholder="0">
-                        </div>
-                        <div class="filter-group">
-                            <label for="filterMaxDistance">Max Distance (km)</label>
-                            <input type="number" id="filterMaxDistance" min="0" step="1" placeholder="No limit">
-                        </div>
-                        <div class="filter-group">
-                            <label for="filterMinVisitors">Min Daily Visitors</label>
-                            <input type="number" id="filterMinVisitors" min="0" step="100" placeholder="0">
-                        </div>
-                        <div class="filter-group">
-                            <label for="filterMaxVisitors">Max Daily Visitors</label>
-                            <input type="number" id="filterMaxVisitors" min="0" step="100" placeholder="No limit">
-                        </div>
+                <nav class="sidebar-nav">
+                    <div class="sidebar-nav-section">
+                        <span class="sidebar-nav-label">Menu</span>
+                        <ul class="sidebar-nav-list">
+                            <li class="sidebar-nav-item">
+                                <a href="index.html" class="sidebar-nav-link active">
+                                    <svg class="sidebar-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <rect x="3" y="3" width="7" height="9" />
+                                        <rect x="14" y="3" width="7" height="5" />
+                                        <rect x="14" y="12" width="7" height="9" />
+                                        <rect x="3" y="16" width="7" height="5" />
+                                    </svg>
+                                    <span class="sidebar-nav-text">Dashboard</span>
+                                </a>
+                            </li>
+                            <li class="sidebar-nav-item">
+                                <a href="saved-locations.html" class="sidebar-nav-link">
+                                    <svg class="sidebar-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                                    </svg>
+                                    <span class="sidebar-nav-text">Saved Locations</span>
+                                </a>
+                            </li>
+                            <li class="sidebar-nav-item">
+                                <a href="buy-machines.html" class="sidebar-nav-link">
+                                    <svg class="sidebar-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <rect x="2" y="4" width="20" height="16" rx="2" />
+                                        <path d="M7 15h0M2 9.5h20" />
+                                    </svg>
+                                    <span class="sidebar-nav-text">Buy Machines</span>
+                                </a>
+                            </li>
+                            <li class="sidebar-nav-item">
+                                <a href="settings.html" class="sidebar-nav-link">
+                                    <svg class="sidebar-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <circle cx="12" cy="12" r="3" />
+                                        <path
+                                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                                    </svg>
+                                    <span class="sidebar-nav-text">Settings</span>
+                                </a>
+                            </li>
+                        </ul>
                     </div>
-                    <div class="filter-categories">
-                        <label>Location Categories</label>
-                        <div class="category-checkboxes">
-                            <label><input type="checkbox" name="filterCategory" value="airport"> Airport</label>
-                            <label><input type="checkbox" name="filterCategory" value="hospital"> Hospital</label>
-                            <label><input type="checkbox" name="filterCategory" value="university"> University</label>
-                            <label><input type="checkbox" name="filterCategory" value="shopping_mall"> Shopping
-                                Mall</label>
-                            <label><input type="checkbox" name="filterCategory" value="gym"> Gym</label>
-                            <label><input type="checkbox" name="filterCategory" value="office"> Office</label>
-                            <label><input type="checkbox" name="filterCategory" value="school"> School</label>
-                            <label><input type="checkbox" name="filterCategory" value="train_station"> Train
-                                Station</label>
-                            <label><input type="checkbox" name="filterCategory" value="supermarket"> Supermarket</label>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <div class="sidebar-user" id="sidebarUser">
+                        <div class="sidebar-user-avatar">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
                         </div>
-                    </div>
-                    <div class="filter-actions">
-                        <button id="applyFiltersBtn" class="primary-btn" type="button">Apply Filters</button>
-                        <button id="resetFiltersBtn" class="ghost-btn" type="button">Reset</button>
+                        <div class="sidebar-user-info">
+                            <span class="sidebar-user-name" id="sidebarUserName">Guest User</span>
+                            <span class="sidebar-user-email" id="sidebarUserEmail">Not signed in</span>
+                        </div>
+                        <button class="sidebar-logout-btn" id="sidebarLogoutBtn" type="button" title="Sign out">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                                <polyline points="16 17 21 12 16 7" />
+                                <line x1="21" y1="12" x2="9" y2="12" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
-            </div>
+            </aside>
 
-            <div id="usageIndicator" class="usage-indicator hidden">
-                <span id="usageText"></span>
-            </div>
+            <!-- Mobile Toggle Button -->
+            <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle sidebar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="12" x2="21" y2="12" />
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <line x1="3" y1="18" x2="21" y2="18" />
+                </svg>
+            </button>
+            <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
+            <!-- Mobile Bottom Navigation -->
+            <nav class="mobile-nav">
+                <ul class="mobile-nav-list">
+                    <li><a href="index.html" class="mobile-nav-link active">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="7" height="9" />
+                                <rect x="14" y="3" width="7" height="5" />
+                                <rect x="14" y="12" width="7" height="9" />
+                                <rect x="3" y="16" width="7" height="5" />
+                            </svg><span>Dashboard</span>
+                        </a></li>
+                    <li><a href="saved-locations.html" class="mobile-nav-link">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                            </svg><span>Saved</span>
+                        </a></li>
+                    <li><a href="buy-machines.html" class="mobile-nav-link">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="4" width="20" height="16" rx="2" />
+                                <path d="M7 15h0M2 9.5h20" />
+                            </svg><span>Shop</span>
+                        </a></li>
+                    <li><a href="settings.html" class="mobile-nav-link">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="3" />
+                            </svg><span>Settings</span>
+                        </a></li>
+                </ul>
+            </nav>
+
+            <!-- Main Dashboard Content -->
+            <main class="main-content">
+                <header class="dashboard-header">
+                    <h1 class="dashboard-title">Find Your Next Location</h1>
+                    <p class="dashboard-subtitle">Search any area to discover high-traffic vending machine spots</p>
+                </header>
+
+                <section class="search-section">
+                    <div class="search-container">
+                        <form id="searchForm" class="search-form" novalidate>
+                            <div class="search-input-wrapper">
+                                <svg class="search-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <path d="m21 21-4.35-4.35"></path>
+                                </svg>
+                                <input type="text" id="locationInput" class="search-input"
+                                    placeholder="Enter zip code, city, or state..." autocomplete="off" required>
+                            </div>
+                            <button id="searchBtn" class="search-btn" type="button">
+                                <span>Search</span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M5 12h14M12 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </form>
+
+                        <div class="search-options">
+                            <label class="search-option-label">
+                                <input type="checkbox" id="highTrafficOnly" checked>
+                                High traffic areas only
+                            </label>
+                            <label class="search-option-label">
+                                <input type="checkbox" id="excludeExisting" checked>
+                                Exclude existing machines
+                            </label>
+                            <button id="advancedFiltersToggle" class="advanced-filters-btn" type="button">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                                </svg>
+                                Filters
+                                <span id="filterBadge" class="filter-badge hidden">0</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="advancedFiltersPanel" class="advanced-filters-panel hidden">
+                        <h3>Advanced Filters</h3>
+                        <div class="filters-grid">
+                            <div class="filter-group">
+                                <label for="filterMinScore">Minimum Overall Score</label>
+                                <input type="number" id="filterMinScore" min="0" max="100" step="5" placeholder="0">
+                            </div>
+                            <div class="filter-group">
+                                <label for="filterMaxDistance">Max Distance (km)</label>
+                                <input type="number" id="filterMaxDistance" min="0" step="1" placeholder="No limit">
+                            </div>
+                            <div class="filter-group">
+                                <label for="filterMinVisitors">Min Daily Visitors</label>
+                                <input type="number" id="filterMinVisitors" min="0" step="100" placeholder="0">
+                            </div>
+                            <div class="filter-group">
+                                <label for="filterMaxVisitors">Max Daily Visitors</label>
+                                <input type="number" id="filterMaxVisitors" min="0" step="100" placeholder="No limit">
+                            </div>
+                        </div>
+                        <div class="filter-categories">
+                            <label>Location Categories</label>
+                            <div class="category-checkboxes">
+                                <label><input type="checkbox" name="filterCategory" value="airport"> Airport</label>
+                                <label><input type="checkbox" name="filterCategory" value="hospital"> Hospital</label>
+                                <label><input type="checkbox" name="filterCategory" value="university">
+                                    University</label>
+                                <label><input type="checkbox" name="filterCategory" value="shopping_mall"> Shopping
+                                    Mall</label>
+                                <label><input type="checkbox" name="filterCategory" value="gym"> Gym</label>
+                                <label><input type="checkbox" name="filterCategory" value="office"> Office</label>
+                                <label><input type="checkbox" name="filterCategory" value="school"> School</label>
+                                <label><input type="checkbox" name="filterCategory" value="train_station"> Train
+                                    Station</label>
+                                <label><input type="checkbox" name="filterCategory" value="supermarket">
+                                    Supermarket</label>
+                            </div>
+                        </div>
+                        <div class="filter-actions">
+                            <button id="applyFiltersBtn" class="primary-btn" type="button">Apply Filters</button>
+                            <button id="resetFiltersBtn" class="ghost-btn" type="button">Reset</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Empty State -->
+                <section id="emptyState" class="empty-state-section">
+                    <div class="recent-section">
+                        <div class="section-header">
+                            <h3 class="section-title">Recent Searches</h3>
+                            <a href="#" class="section-link" id="clearRecentBtn">Clear all</a>
+                        </div>
+                        <div id="recentSearchesGrid" class="suggestions-grid"></div>
+                        <div id="noRecentSearches" class="empty-state">
+                            <div class="empty-state-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <path d="m21 21-4.35-4.35"></path>
+                                </svg>
+                            </div>
+                            <h3 class="empty-state-title">No recent searches</h3>
+                            <p class="empty-state-text">Enter a location above to start finding profitable vending
+                                spots.</p>
+                        </div>
+                    </div>
+
+                    <div class="recent-section" style="margin-top: 32px;">
+                        <div class="section-header">
+                            <h3 class="section-title">Trending Areas</h3>
+                        </div>
+                        <div class="trending-areas">
+                            <button class="trending-badge" data-location="New York, NY">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M13 17l5-5-5-5M6 17l5-5-5-5" />
+                                </svg>
+                                New York, NY
+                            </button>
+                            <button class="trending-badge" data-location="Los Angeles, CA">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M13 17l5-5-5-5M6 17l5-5-5-5" />
+                                </svg>
+                                Los Angeles, CA
+                            </button>
+                            <button class="trending-badge" data-location="Chicago, IL">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M13 17l5-5-5-5M6 17l5-5-5-5" />
+                                </svg>
+                                Chicago, IL
+                            </button>
+                            <button class="trending-badge" data-location="Houston, TX">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M13 17l5-5-5-5M6 17l5-5-5-5" />
+                                </svg>
+                                Houston, TX
+                            </button>
+                            <button class="trending-badge" data-location="Miami, FL">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M13 17l5-5-5-5M6 17l5-5-5-5" />
+                                </svg>
+                                Miami, FL
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <div id="usageIndicator" class="usage-indicator hidden">
+                    <span id="usageText"></span>
+                </div>
+            </main>
         </div><!-- End dashboardSection -->
+
+
 
 
         <div id="loadingIndicator" class="loading hidden">

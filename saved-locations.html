@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Locations - VendingSpot</title>
+    <meta name="description" content="View and manage your saved vending machine locations with revenue tracking.">
+    <link rel="stylesheet" href="/src/styles/main.css">
+</head>
+
+<body class="app-body">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                        <circle cx="12" cy="10" r="3" />
+                    </svg>
+                </div>
+                <div class="sidebar-logo-text">
+                    <span class="sidebar-logo-title">VendingSpot</span>
+                    <span class="sidebar-logo-subtitle">Location Finder</span>
+                </div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="sidebar-nav-section">
+                <span class="sidebar-nav-label">Menu</span>
+                <ul class="sidebar-nav-list">
+                    <li class="sidebar-nav-item">
+                        <a href="index.html" class="sidebar-nav-link">
+                            <svg class="sidebar-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <rect x="3" y="3" width="7" height="9" />
+                                <rect x="14" y="3" width="7" height="5" />
+                                <rect x="14" y="12" width="7" height="9" />
+                                <rect x="3" y="16" width="7" height="5" />
+                            </svg>
+                            <span class="sidebar-nav-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="saved-locations.html" class="sidebar-nav-link active">
+                            <svg class="sidebar-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                            </svg>
+                            <span class="sidebar-nav-text">Saved Locations</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="buy-machines.html" class="sidebar-nav-link">
+                            <svg class="sidebar-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <rect x="2" y="4" width="20" height="16" rx="2" />
+                                <path d="M7 15h0M2 9.5h20" />
+                            </svg>
+                            <span class="sidebar-nav-text">Buy Machines</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="settings.html" class="sidebar-nav-link">
+                            <svg class="sidebar-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="12" cy="12" r="3" />
+                                <path
+                                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                            </svg>
+                            <span class="sidebar-nav-text">Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-user" id="sidebarUser">
+                <div class="sidebar-user-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <div class="sidebar-user-info">
+                    <span class="sidebar-user-name" id="sidebarUserName">Guest User</span>
+                    <span class="sidebar-user-email" id="sidebarUserEmail">Not signed in</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Mobile Toggle Button -->
+    <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+    </button>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-nav">
+        <ul class="mobile-nav-list">
+            <li><a href="index.html" class="mobile-nav-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="9" />
+                        <rect x="14" y="3" width="7" height="5" />
+                        <rect x="14" y="12" width="7" height="9" />
+                        <rect x="3" y="16" width="7" height="5" />
+                    </svg><span>Dashboard</span>
+                </a></li>
+            <li><a href="saved-locations.html" class="mobile-nav-link active">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                    </svg><span>Saved</span>
+                </a></li>
+            <li><a href="buy-machines.html" class="mobile-nav-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="4" width="20" height="16" rx="2" />
+                        <path d="M7 15h0M2 9.5h20" />
+                    </svg><span>Shop</span>
+                </a></li>
+            <li><a href="settings.html" class="mobile-nav-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3" />
+                    </svg><span>Settings</span>
+                </a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <header class="dashboard-header">
+                <h1 class="dashboard-title">Saved Locations</h1>
+                <p class="dashboard-subtitle">Track your portfolio of vending machine spots and projected revenue</p>
+            </header>
+
+            <!-- Stats Row -->
+            <div class="stats-row" id="savedStats">
+                <div class="stat-card">
+                    <span class="stat-card-label">Total Saved</span>
+                    <span class="stat-card-value" id="totalSaved">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-card-label">Total Projected Revenue</span>
+                    <span class="stat-card-value" id="totalRevenue">$0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-card-label">Avg. Score</span>
+                    <span class="stat-card-value" id="avgScore">—</span>
+                </div>
+            </div>
+
+            <!-- Saved Locations Grid -->
+            <div id="savedLocationsGrid" class="saved-locations-grid">
+                <!-- Populated by JavaScript -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="noSavedLocations" class="empty-state">
+                <div class="empty-state-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                    </svg>
+                </div>
+                <h3 class="empty-state-title">No saved locations yet</h3>
+                <p class="empty-state-text">Search for locations on the Dashboard and click the bookmark icon to save
+                    them here.</p>
+                <a href="index.html" class="search-btn" style="display: inline-flex; margin-top: 20px;">
+                    <span>Go to Dashboard</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        style="width: 18px; height: 18px;">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <style>
+        .saved-locations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+        }
+
+        .saved-location-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            transition: all var(--transition-fast);
+        }
+
+        .saved-location-card:hover {
+            border-color: var(--accent-primary);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .saved-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .saved-card-category {
+            display: inline-block;
+            padding: 4px 10px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-pill);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent-primary-light);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .saved-card-score {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--success-color);
+        }
+
+        .saved-card-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .saved-card-address {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .saved-card-revenue {
+            margin-bottom: 16px;
+        }
+
+        .revenue-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .revenue-input-wrapper {
+            position: relative;
+        }
+
+        .revenue-input {
+            width: 100%;
+            padding: 12px 16px;
+            padding-left: 28px;
+            font-size: 1rem;
+            font-weight: 600;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            transition: all var(--transition-fast);
+        }
+
+        .revenue-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .revenue-currency {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .saved-card-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .saved-card-btn {
+            flex: 1;
+            padding: 10px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .saved-card-btn.primary {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .saved-card-btn.primary:hover {
+            background: var(--accent-primary-light);
+        }
+
+        .saved-card-btn.danger {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        .saved-card-btn.danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error-color);
+        }
+
+        .saved-card-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .saved-locations-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <script type="module">
+        // Saved Locations Page Logic
+        import { getSavedLocations, removeSavedLocation, updateSavedLocation } from '/lib/savedLocations.js';
+
+        function initSidebar() {
+            const toggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            if (toggle && sidebar && overlay) {
+                toggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('mobile-open');
+                    overlay.classList.toggle('active');
+                });
+
+                overlay.addEventListener('click', () => {
+                    sidebar.classList.remove('mobile-open');
+                    overlay.classList.remove('active');
+                });
+            }
+
+            // Update sidebar user info
+            updateSidebarUser();
+        }
+
+        function updateSidebarUser() {
+            const nameEl = document.getElementById('sidebarUserName');
+            const emailEl = document.getElementById('sidebarUserEmail');
+
+            if (!nameEl || !emailEl) return;
+
+            const email = localStorage.getItem('activeUserEmail') ||
+                localStorage.getItem('insiderRememberEmail') ||
+                localStorage.getItem('pendingCheckoutEmail') ||
+                sessionStorage.getItem('activeUserEmail');
+
+            if (email) {
+                nameEl.textContent = email.split('@')[0];
+                emailEl.textContent = email;
+            } else {
+                nameEl.textContent = 'Guest User';
+                emailEl.textContent = 'Not signed in';
+            }
+        }
+
+        function formatCurrency(value) {
+            const num = parseFloat(value) || 0;
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(num);
+        }
+
+        function parseCurrency(str) {
+            return parseFloat(str.replace(/[^0-9.-]/g, '')) || 0;
+        }
+
+        function renderSavedLocations() {
+            const locations = getSavedLocations();
+            const grid = document.getElementById('savedLocationsGrid');
+            const emptyState = document.getElementById('noSavedLocations');
+            const totalSavedEl = document.getElementById('totalSaved');
+            const totalRevenueEl = document.getElementById('totalRevenue');
+            const avgScoreEl = document.getElementById('avgScore');
+
+            if (!grid) return;
+
+            if (locations.length === 0) {
+                grid.innerHTML = '';
+                emptyState?.classList.remove('hidden');
+                totalSavedEl.textContent = '0';
+                totalRevenueEl.textContent = '$0';
+                avgScoreEl.textContent = '—';
+                return;
+            }
+
+            emptyState?.classList.add('hidden');
+
+            // Calculate stats
+            totalSavedEl.textContent = locations.length;
+            const totalRev = locations.reduce((sum, loc) => sum + (loc.monthlyRevenue || 0), 0);
+            totalRevenueEl.textContent = formatCurrency(totalRev) + '/mo';
+            const avgScore = Math.round(locations.reduce((sum, loc) => sum + (loc.overallScore || 0), 0) / locations.length);
+            avgScoreEl.textContent = avgScore || '—';
+
+            grid.innerHTML = locations.map(loc => `
+                <div class="saved-location-card" data-id="${loc.id}">
+                    <div class="saved-card-header">
+                        <span class="saved-card-category">${loc.displayCategory || loc.category || 'Location'}</span>
+                        <span class="saved-card-score">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                            </svg>
+                            ${loc.overallScore || 0}
+                        </span>
+                    </div>
+                    <h3 class="saved-card-name">${loc.name || 'Unnamed Location'}</h3>
+                    <p class="saved-card-address">${loc.address || 'No address'}</p>
+                    <div class="saved-card-revenue">
+                        <label class="revenue-label">Projected Monthly Revenue</label>
+                        <div class="revenue-input-wrapper">
+                            <span class="revenue-currency">$</span>
+                            <input type="text" class="revenue-input" 
+                                   value="${loc.monthlyRevenue || ''}" 
+                                   placeholder="0"
+                                   data-id="${loc.id}">
+                        </div>
+                    </div>
+                    <div class="saved-card-actions">
+                        <button class="saved-card-btn primary view-btn" data-id="${loc.id}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                            View
+                        </button>
+                        <button class="saved-card-btn danger remove-btn" data-id="${loc.id}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6" />
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                            </svg>
+                            Remove
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Add event listeners
+            grid.querySelectorAll('.revenue-input').forEach(input => {
+                input.addEventListener('blur', (e) => {
+                    const id = e.target.dataset.id;
+                    const value = parseCurrency(e.target.value);
+                    updateSavedLocation(id, { monthlyRevenue: value });
+                    e.target.value = value || '';
+                    renderSavedLocations(); // Refresh stats
+                });
+
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') e.target.blur();
+                });
+            });
+
+            grid.querySelectorAll('.remove-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.currentTarget.dataset.id;
+                    if (confirm('Remove this location from your saved list?')) {
+                        removeSavedLocation(id);
+                        renderSavedLocations();
+                    }
+                });
+            });
+
+            grid.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.currentTarget.dataset.id;
+                    // Store the ID and redirect to dashboard
+                    sessionStorage.setItem('viewLocationId', id);
+                    window.location.href = 'index.html';
+                });
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initSidebar();
+            renderSavedLocations();
+        });
+    </script>
+</body>
+
+</html>

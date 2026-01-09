@@ -1,5 +1,6 @@
 @import './base.css';
 @import './layout.css';
+@import './sidebar.css';
+@import './dashboard.css';
 @import './components.css';
 @import './utilities.css';
-

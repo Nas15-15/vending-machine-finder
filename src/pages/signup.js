@@ -16,23 +16,31 @@ document.addEventListener('DOMContentLoaded', () => {
       form.reportValidity();
       return;
     }
+    const btnText = submitBtn.querySelector('span') || submitBtn;
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Submitting…';
+    btnText.textContent = 'Creating account…';
     try {
       const payload = Object.fromEntries(new FormData(form).entries());
       const result = await apiPost('/api/waitlist', payload);
       setStoredEmail(payload.email);
       form.reset();
       successBanner?.classList.remove('hidden');
-      showToast(`Account created and logged in! You have ${result.freeSearchesGranted || 25} free searches.`, 'success');
-      // Redirect to home page immediately since user is now logged in
+
+      // Show different message for new vs existing accounts
+      if (result.isNewAccount) {
+        showToast(`Account created! You have ${result.freeSearchesGranted || 25} free searches.`, 'success');
+      } else {
+        showToast(`Welcome back! You have ${result.freeSearchesRemaining || 0} searches remaining.`, 'success');
+      }
+
+      // Redirect to home page
       setTimeout(() => {
         window.location.href = 'index.html';
       }, 1500);
     } catch (error) {
       showToast(error.message || 'Could not create account.', 'error');
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Create my account';
+      btnText.textContent = 'Get started free';
     }
   });
 });
