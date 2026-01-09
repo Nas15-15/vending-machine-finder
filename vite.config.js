@@ -3,7 +3,11 @@ import legacy from '@vitejs/plugin-legacy';
 
 const MULTI_PAGE_INPUT = {
   main: 'index.html',
-  signup: 'signup.html'
+  signup: 'signup.html',
+  login: 'login.html',
+  buyMachines: 'buy-machines.html',
+  savedLocations: 'saved-locations.html',
+  settings: 'settings.html'
 };
 
 export default defineConfig(({ mode }) => ({
