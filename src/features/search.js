@@ -93,13 +93,7 @@ export async function performSearch() {
       highTrafficOnly,
       ...advancedFilters
     };
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/b612881c-bd0e-49ba-9272-bdca4a0a1a9d', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'search.js:84', message: 'calling apiPost', data: { path: '/api/search', hasQuery: !!query, hasEmail: !!email, excludeExisting, highTrafficOnly, filterKeys: Object.keys(advancedFilters) }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'A' }) }).catch(() => { });
-    // #endregion
     const response = await apiPost('/api/search', requestBody);
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/b612881c-bd0e-49ba-9272-bdca4a0a1a9d', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'search.js:92', message: 'apiPost response received', data: { hasResponse: !!response, hasResults: !!response?.results, resultsCount: response?.results?.length || 0, blurred: response?.blurred }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'A' }) }).catch(() => { });
-    // #endregion
     const locations = response.results || [];
 
     // Handle blurred results (anonymous search)
