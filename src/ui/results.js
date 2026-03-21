@@ -171,23 +171,7 @@ function updateStreetView (location) {
   }
 }
 
-function updateVendingStatus (location) {
-  const indicator = document.getElementById('vendingStatusIndicator');
-  const statusText = document.getElementById('vendingStatusText');
-  const statusDetail = document.getElementById('vendingStatusDetail');
-  
-  if (!indicator || !statusText || !statusDetail) return;
-  
-  if (location.hasExistingVendingMachine) {
-    indicator.className = 'vending-status-indicator has-machines';
-    statusText.textContent = 'Competition Detected';
-    statusDetail.textContent = 'Our analysis indicates there may be existing vending machines in this area. Consider differentiating with unique products, healthier options, or premium machine features to stand out from competitors.';
-  } else {
-    indicator.className = 'vending-status-indicator no-machines';
-    statusText.textContent = 'No Vending Machines Detected';
-    statusDetail.textContent = 'This location appears to be untapped territory! No existing vending machines were detected nearby, giving you a first-mover advantage in this area.';
-  }
-}
+
 
 function updateOwnerSection (location) {
   const ownerName = document.getElementById('detailOwnerName');
@@ -342,8 +326,6 @@ function updateDetailPanel (location) {
   // Street View
   updateStreetView(location);
   
-  // Vending Status
-  updateVendingStatus(location);
   
   // Owner Section
   updateOwnerSection(location);

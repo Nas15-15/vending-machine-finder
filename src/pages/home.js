@@ -3,8 +3,8 @@ import 'leaflet/dist/leaflet.css';
 import { initMap } from '../ui/map.js';
 import { initSearchForm } from '../features/search.js';
 import { attachGlobalErrorHandler, showToast } from '../ui/notifications.js';
-import { bindEmailInput, getStoredEmail } from '../state/email.js';
-import { loadSession } from '../state/access.js';
+import { bindEmailInput, getStoredEmail, clearStoredEmail } from '../state/email.js';
+import { loadSession, clearSessionCache } from '../state/access.js';
 import { initROICalculator } from '../ui/roiCalculator.js';
 import { initComparisonTool } from '../ui/comparisonTool.js';
 import { initExportPanel, setExportLocations } from '../ui/exportPanel.js';
@@ -26,13 +26,23 @@ function initOwnerPreview() {
 }
 
 function initLogoutButton() {
+  const handleLogout = async () => {
+    // Clear local state first
+    clearSessionCache();
+    clearStoredEmail();
+
+    // Call logout API (don't await - we're navigating anyway)
+    fetch('/api/logout', { method: 'POST', credentials: 'include' }).catch(() => { });
+
+    // Force navigation to landing page
+    window.location.replace('/index.html');
+  };
+
   const logoutBtn = document.getElementById('logoutBtn');
-  if (!logoutBtn) return;
-  logoutBtn.addEventListener('click', async () => {
-    await fetch('/api/logout', { method: 'POST', credentials: 'include' });
-    showToast('Signed out', 'success');
-    window.location.reload();
-  });
+  logoutBtn?.addEventListener('click', handleLogout);
+
+  const sidebarLogoutBtn = document.getElementById('sidebarLogoutBtn');
+  sidebarLogoutBtn?.addEventListener('click', handleLogout);
 }
 
 async function hydrateSessionUi() {

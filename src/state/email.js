@@ -2,12 +2,12 @@ const STORAGE_KEY = 'vmfActiveEmail';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function sanitizeEmail (value = '') {
+export function sanitizeEmail(value = '') {
   const normalized = value.trim().toLowerCase();
   return emailRegex.test(normalized) ? normalized : '';
 }
 
-export function getStoredEmail () {
+export function getStoredEmail() {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY) || '';
     return sanitizeEmail(raw);
@@ -16,7 +16,7 @@ export function getStoredEmail () {
   }
 }
 
-export function setStoredEmail (value) {
+export function setStoredEmail(value) {
   const normalized = sanitizeEmail(value);
   if (!normalized) return '';
   try {
@@ -27,7 +27,15 @@ export function setStoredEmail (value) {
   return normalized;
 }
 
-export function bindEmailInput (input) {
+export function clearStoredEmail() {
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // ignore storage errors
+  }
+}
+
+export function bindEmailInput(input) {
   if (!input) return;
   const existing = getStoredEmail();
   if (existing) {

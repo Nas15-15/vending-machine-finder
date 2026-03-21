@@ -67,11 +67,10 @@ export async function performSearch() {
   hideError();
   const queryInput = document.getElementById('locationInput');
   const emailInput = document.getElementById('searchEmailInput');
-  const excludeExisting = document.getElementById('excludeExisting')?.checked ?? true;
   const highTrafficOnly = document.getElementById('highTrafficOnly')?.checked ?? true;
   const query = queryInput?.value?.trim() || '';
   const email = sanitizeEmail(emailInput?.value || getStoredEmail());
-  console.log('Search params:', { query, email: email ? '***' : 'missing', excludeExisting, highTrafficOnly });
+  console.log('Search params:', { query, email: email ? '***' : 'missing', highTrafficOnly });
   if (!query) {
     console.warn('No query provided');
     showToast('Enter a location to search.', 'error');
@@ -89,7 +88,6 @@ export async function performSearch() {
     const requestBody = {
       query,
       email: email || undefined,
-      excludeExisting,
       highTrafficOnly,
       ...advancedFilters
     };

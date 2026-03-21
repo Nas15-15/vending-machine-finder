@@ -1,0 +1,98 @@
+OPENAI_API_KEY set: true
+isAIConfigured: true
+
+
+--- Testing Query: 10001 ---
+Geocoded to: {"lat":40.7485885,"lon":-73.994133,"displayName":"10001, Manhattan, New York County, New York, United States","type":"postcode","class":"place","bound
+ Progress: Location found, generating search regions...
+Fetching locations for 1 region(s)
+Region 1: center=(40.7485885, -73.994133), radius=8000m
+ Progress: Scanning area 1/1...
+Calling Overpass API: https://overpass-api.de/api/interpreter?data=%5Bout%3Ajson%5D%5Btimeout%3A60%5D%3B%0A%20%20%20%20(%0A%20%20%20%20%20%20node%0A%20%20%20%20%20%20%20%20(around%3A8000%2C40.7485885%2C-73.994133)%0A%20%20...
+ Progress: Searching Google Places...
+[Google Places] Found 378 unique places across all types
+Overpass API returned 4269 elements
+Processed 4269 elements -> 3785 locations (skipped: 0 no coords, 484 out of range)
+Region 1: got 3785 locations
+ Progress: Collected 3773 locations (1/1)
+Total unique locations collected: 3773
+[Search] Merged: 3773 Overpass + 20 Google Places = 3777 total (after dedup)
+ Progress: Found 3777 locations, ranking...
+ Progress: AI is evaluating locations...
+[Search] AI is configured, evaluating 50 locations...
+[AI Evaluation] Sending 50 locations to Gemini 2.5...
+[AI Evaluation] Successfully parsed 50 evaluations
+[AI Evaluation] Sample result: {
+  businessName: 'Hoboken Fire Dept Ladder 2 Engine 5',
+  score: 90,
+  status: 'APPROVED',
+  reasoning: "Firefighters are a captive audience working long, unpredictable shifts, and they'll definitely appreciate convenient access to snacks and drinks."
+}
+[Search] AI evaluation complete: 50/50 locations got AI scores
+Results found: 50
+Top result: Weill Cornell Medical College (university)
+AI fields -> score: 95, status: APPROVED, reasoning: Medical students and staff work incredibly long, irregular hours, so convenient vending options are essential for them.
+
+
+--- Testing Query: 32789 ---
+Geocoded to: {"lat":28.5989006,"lon":-81.3496405,"displayName":"32789, Winter Park, Orange County, Florida, United States","type":"postcode","class":"place","bound
+ Progress: Location found, generating search regions...
+Fetching locations for 1 region(s)
+Region 1: center=(28.5989006, -81.3496405), radius=8000m
+ Progress: Scanning area 1/1...
+Calling Overpass API: https://overpass-api.de/api/interpreter?data=%5Bout%3Ajson%5D%5Btimeout%3A60%5D%3B%0A%20%20%20%20(%0A%20%20%20%20%20%20node%0A%20%20%20%20%20%20%20%20(around%3A8000%2C28.5989006%2C-81.3496405)%0A%20%2...
+ Progress: Searching Google Places...
+[Google Places] Found 321 unique places across all types
+Overpass API returned 2526 elements
+Processed 2526 elements -> 2171 locations (skipped: 0 no coords, 355 out of range)
+Region 1: got 2171 locations
+ Progress: Collected 2171 locations (1/1)
+Total unique locations collected: 2171
+[Search] Merged: 2171 Overpass + 20 Google Places = 2185 total (after dedup)
+ Progress: Found 2185 locations, ranking...
+ Progress: AI is evaluating locations...
+[Search] AI is configured, evaluating 50 locations...
+[AI Evaluation] Sending 50 locations to Gemini 2.5...
+[AI Evaluation] Successfully parsed 50 evaluations
+[AI Evaluation] Sample result: {
+  businessName: 'Lake Eola Charter School',
+  score: 90,
+  status: 'APPROVED',
+  reasoning: 'Schools are prime locations with a captive audience of students and staff who need snacks and drinks all day.'
+}
+[Search] AI evaluation complete: 50/50 locations got AI scores
+Results found: 50
+Top result: Winter Park Fire Department Station 62 (fire_station)
+AI fields -> score: 95, status: APPROVED, reasoning: Fire stations have staff on duty 24/7 with limited access to outside food, making them perfect for consistent sales.
+
+
+--- Testing Query: 59001 ---
+Geocoded to: {"lat":45.6742907,"lon":-109.7768924,"displayName":"59001, Sweet Grass County, Montana, United States","type":"postcode","class":"place","boundingBox"
+ Progress: Location found, generating search regions...
+Fetching locations for 1 region(s)
+Region 1: center=(45.6742907, -109.7768924), radius=8000m
+ Progress: Scanning area 1/1...
+Calling Overpass API: https://overpass-api.de/api/interpreter?data=%5Bout%3Ajson%5D%5Btimeout%3A60%5D%3B%0A%20%20%20%20(%0A%20%20%20%20%20%20node%0A%20%20%20%20%20%20%20%20(around%3A8000%2C45.6742907%2C-109.7768924)%0A%20%...
+ Progress: Searching Google Places...
+Overpass API returned 0 elements
+Processed 0 elements -> 0 locations (skipped: 0 no coords, 0 out of range)
+Region 1: got 0 locations
+ Progress: Collected 0 locations (1/1)
+Total unique locations collected: 0
+[Google Places] Found 18 unique places across all types
+ Progress: Found 18 locations, ranking...
+ Progress: AI is evaluating locations...
+[Search] AI is configured, evaluating 12 locations...
+[AI Evaluation] Sending 12 locations to Gemini 2.5...
+[AI Evaluation] Successfully parsed 12 evaluations
+[AI Evaluation] Sample result: {
+  businessName: 'The Fox Den Silo',
+  score: 85,
+  status: 'APPROVED',
+  reasoning: 'Hotel guests are always looking for convenient snacks and drinks, especially outside of regular restaurant hours.'
+}
+[Search] AI evaluation complete: 12/12 locations got AI scores
+Results found: 12
+Top result: Greycliff Rest Area Eastbound (other)
+AI fields -> score: 95, status: APPROVED, reasoning: Rest areas have constant, high foot traffic from travelers who are often looking for quick snacks and drinks, especially when other options are far away.
+DONE

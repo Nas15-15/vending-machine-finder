@@ -1,7 +1,6 @@
 import { showToast } from './notifications.js';
 
 let currentFilters = {
-  excludeExisting: true,
   highTrafficOnly: true,
   minScore: 0,
   maxDistance: Infinity,
@@ -60,7 +59,6 @@ function handleApplyFilters () {
     : null;
 
   currentFilters = {
-    excludeExisting: document.getElementById('excludeExisting')?.checked ?? true,
     highTrafficOnly: document.getElementById('highTrafficOnly')?.checked ?? true,
     minScore,
     maxDistance: maxDistance === Infinity ? Infinity : maxDistance * 1000, // Convert km to meters
@@ -83,7 +81,6 @@ function handleApplyFilters () {
  */
 function handleResetFilters () {
   currentFilters = {
-    excludeExisting: true,
     highTrafficOnly: true,
     minScore: 0,
     maxDistance: Infinity,

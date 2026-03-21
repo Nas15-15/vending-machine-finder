@@ -27,6 +27,7 @@ import {
 } from './lib/accessStore.js';
 
 import { runSearch } from './lib/searchService.js';
+import { supabase, isSupabaseConfigured } from './lib/supabaseClient.js';
 
 dotenv.config();
 
@@ -55,10 +56,14 @@ const allowedOrigins = new Set(
 
 const corsOptions = {
   origin(origin, callback) {
-    if (!origin || allowedOrigins.has(origin)) {
+    if (
+      !origin || 
+      allowedOrigins.has(origin) || 
+      (process.env.NODE_ENV !== 'production' && origin.startsWith('http://localhost:'))
+    ) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(null, false);
     }
   },
   credentials: true
@@ -138,11 +143,53 @@ const getLocationFromIP = async (ip) => {
   }
 };
 
-const searchLimiter = rateLimit({
+const fallbackLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 6,
   message: 'Too many searches from this IP, please try again shortly.'
 });
+
+const searchLimiter = async (req, res, next) => {
+  if (!isSupabaseConfigured()) {
+    return fallbackLimiter(req, res, next);
+  }
+
+  const clientInfo = getClientInfo(req);
+  const ip = clientInfo.ip;
+  if (!ip || ip === 'unknown') return next();
+
+  const windowMs = 60 * 1000;
+  const maxHits = 6;
+  const now = Date.now();
+
+  try {
+    const { data: limitRecord } = await supabase
+      .from('rate_limits')
+      .select('*')
+      .eq('ip', ip)
+      .single();
+
+    if (!limitRecord) {
+      await supabase.from('rate_limits').insert({ ip, hits: 1, window_start: now });
+      return next();
+    }
+
+    if (now - limitRecord.window_start > windowMs) {
+      await supabase.from('rate_limits').update({ hits: 1, window_start: now }).eq('ip', ip);
+      return next();
+    }
+
+    if (limitRecord.hits >= maxHits) {
+      return res.status(429).json({ error: 'Too many searches from this IP, please try again shortly.', retryAfter: windowMs / 1000 });
+    }
+
+    await supabase.from('rate_limits').update({ hits: limitRecord.hits + 1 }).eq('ip', ip);
+    next();
+  } catch (error) {
+    console.error('Distributed Rate Limit error:', error.message);
+    fallbackLimiter(req, res, next);
+  }
+};
 
 app.use(cors(corsOptions));
 app.use(cookieParser());
@@ -369,7 +416,6 @@ app.post('/api/search', searchLimiter, async (req, res) => {
   const {
     query,
     email,
-    excludeExisting = true,
     highTrafficOnly = true,
     minScore = 0,
     maxDistance = Infinity,
@@ -430,7 +476,6 @@ app.post('/api/search', searchLimiter, async (req, res) => {
     // Perform search for anonymous user (results will be blurred)
     try {
       const payload = await runSearch(query, {
-        excludeExisting: Boolean(excludeExisting),
         highTrafficOnly: Boolean(highTrafficOnly),
         minScore: parseFloat(minScore) || 0,
         maxDistance: maxDistance === Infinity || maxDistance === 'Infinity' ? Infinity : parseFloat(maxDistance),
@@ -475,7 +520,6 @@ app.post('/api/search', searchLimiter, async (req, res) => {
   try {
     // Perform search using search service
     const payload = await runSearch(query, {
-      excludeExisting: Boolean(excludeExisting),
       highTrafficOnly: Boolean(highTrafficOnly),
       minScore: parseFloat(minScore) || 0,
       maxDistance: maxDistance === Infinity || maxDistance === 'Infinity' ? Infinity : parseFloat(maxDistance),
@@ -523,7 +567,14 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
+import { isGooglePlacesConfigured } from './lib/googlePlacesService.js';
+import { isAIConfigured } from './lib/aiEvaluationService.js';
+
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server listening on http://0.0.0.0:${port}`);
   console.log(`Access from network: http://192.168.0.41:${port}`);
+  console.log('');
+  console.log('Integration status:');
+  console.log(`  ${isGooglePlacesConfigured() ? '✅' : '⚠️'} Google Places API: ${isGooglePlacesConfigured() ? 'Active' : 'Not configured (set GOOGLE_PLACES_API_KEY in .env)'}`);
+  console.log(`  ${isAIConfigured() ? '✅' : '⚠️'} AI Evaluation:     ${isAIConfigured() ? 'Active (Primary: Gemini, Fallback: OpenAI)' : 'Not configured (set GEMINI_API_KEY or OPENAI_API_KEY in .env)'}`);
 });

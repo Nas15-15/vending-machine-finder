@@ -4,18 +4,22 @@ import { getStoredEmail, sanitizeEmail } from './email.js';
 let sessionCache = null;
 const accessCache = new Map();
 
-export async function loadSession () {
+export async function loadSession() {
   if (sessionCache) return sessionCache;
   sessionCache = await apiGet('/api/session').catch(() => ({ active: false }));
   return sessionCache;
 }
 
-export async function refreshSession () {
+export async function refreshSession() {
   sessionCache = null;
   return loadSession();
 }
 
-export async function fetchAccessStatus (email = getStoredEmail()) {
+export function clearSessionCache() {
+  sessionCache = null;
+}
+
+export async function fetchAccessStatus(email = getStoredEmail()) {
   const normalized = sanitizeEmail(email);
   if (!normalized) {
     return {
@@ -33,7 +37,7 @@ export async function fetchAccessStatus (email = getStoredEmail()) {
   return data;
 }
 
-export function invalidateAccessCache (email = getStoredEmail()) {
+export function invalidateAccessCache(email = getStoredEmail()) {
   const normalized = sanitizeEmail(email);
   if (normalized) {
     accessCache.delete(normalized);
