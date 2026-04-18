@@ -1,9 +1,10 @@
-OPENAI_API_KEY set: false
-isAIConfigured: false
+OPENAI_API_KEY set: true
+isAIConfigured: true
 
 
 --- Testing Query: 10001 ---
 Geocoded to: {"lat":40.7485885,"lon":-73.994133,"displayName":"10001, Manhattan, New York County, New York, United States","type":"postcode","class":"place","bound
+ Progress: Checking cache...
  Progress: Location found, generating search regions...
 Fetching locations for 1 region(s)
 Region 1: center=(40.7485885, -73.994133), radius=8000m
@@ -11,52 +12,32 @@ Region 1: center=(40.7485885, -73.994133), radius=8000m
 Calling Overpass API: https://overpass-api.de/api/interpreter?data=%5Bout%3Ajson%5D%5Btimeout%3A60%5D%3B%0A%20%20%20%20(%0A%20%20%20%20%20%20node%0A%20%20%20%20%20%20%20%20(around%3A8000%2C40.7485885%2C-73.994133)%0A%20%20...
  Progress: Searching Google Places...
 [Google Places] Found 378 unique places across all types
-Overpass API HTTP error (429): <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-  <meta http-equiv="content-type" content="text/html; charset=utf-8" lang="en"/>
-  <title>OSM3S Response</title>
-</head>
-<body>
-
-<p>The data included in this document is from www.openstreetmap.org. The data is made available under ODbL.</p>
-<p><strong style="color:#FF0000
-Overpass API error: Overpass API error (429): <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:
-Error stack: Error: Overpass API error (429): <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:
-    at findHighTrafficLocations (file:///C:/Users/nasir/OneDrive/Desktop/Projects/vending-machine-finder/lib/searchService.js:425:13)
-    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
-    at async fetchLocationsForRegions (file:///C:/Users/nasir/OneDrive/Desktop/Projects/vending-machine-finder/lib/searchService.js:342:31)
-    at async Promise.all (index 0)
-    at async runSearch (file:///C:/Users/nasir/OneDrive/Desktop/Projects/vending-machine-finder/lib/searchService.js:858:48)
-    at async testQuery (file:///C:/Users/nasir/OneDrive/Desktop/Projects/vending-machine-finder/test_direct.js:15:20)
-    at async runAll (file:///C:/Users/nasir/OneDrive/Desktop/Projects/vending-machine-finder/test_direct.js:37:3)
-Error fetching locations for region 1: Overpass API error (429): <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:
-Total unique locations collected: 0
- Progress: Found 20 locations, ranking...
-[Search] AI is NOT configured (OPENAI_API_KEY missing or empty)
-Results found: 20
-Top result: Park Central Hotel New York (hotel)
+Overpass API returned 4270 elements
+Processed 4270 elements -> 3786 locations (skipped: 0 no coords, 484 out of range)
+Region 1: got 3786 locations
+ Progress: Collected 3774 locations (1/1)
+Total unique locations collected: 3774
+[Search] Merged: 3774 Overpass + 20 Google Places = 3778 total (after dedup)
+ Progress: Found 3778 locations, ranking...
+ Progress: AI is evaluating locations...
+[Search] AI is configured, evaluating 50 locations...
+[AI Evaluation] Sending 50 locations to Gemini 2.5...
+[AI Evaluation] Sending 50 locations to OpenAI...
+[Search] AI evaluation complete: 0/50 locations got AI scores
+[Search] Saved results to cache for query: "10001"
+Results found: 50
+Top result: Steinway Auto Repairs (car_repair)
 AI fields -> score: undefined, status: undefined, reasoning: undefined
 
 
 --- Testing Query: 32789 ---
-Geocoded to: {"lat":28.5989006,"lon":-81.3496405,"displayName":"32789, Winter Park, Orange County, Florida, United States","type":"postcode","class":"place","bound
+Geocoded to: {"lat":28.5988996,"lon":-81.3496422,"displayName":"32789, Winter Park, Orange County, Florida, United States","type":"postcode","class":"place","bound
+ Progress: Checking cache...
  Progress: Location found, generating search regions...
 Fetching locations for 1 region(s)
-Region 1: center=(28.5989006, -81.3496405), radius=8000m
+Region 1: center=(28.5988996, -81.3496422), radius=8000m
  Progress: Scanning area 1/1...
-Calling Overpass API: https://overpass-api.de/api/interpreter?data=%5Bout%3Ajson%5D%5Btimeout%3A60%5D%3B%0A%20%20%20%20(%0A%20%20%20%20%20%20node%0A%20%20%20%20%20%20%20%20(around%3A8000%2C28.5989006%2C-81.3496405)%0A%20%2...
+Calling Overpass API: https://overpass-api.de/api/interpreter?data=%5Bout%3Ajson%5D%5Btimeout%3A60%5D%3B%0A%20%20%20%20(%0A%20%20%20%20%20%20node%0A%20%20%20%20%20%20%20%20(around%3A8000%2C28.5988996%2C-81.3496422)%0A%20%2...
  Progress: Searching Google Places...
 [Google Places] Found 321 unique places across all types
 Overpass API returned 2526 elements
@@ -66,14 +47,20 @@ Region 1: got 2171 locations
 Total unique locations collected: 2171
 [Search] Merged: 2171 Overpass + 20 Google Places = 2185 total (after dedup)
  Progress: Found 2185 locations, ranking...
-[Search] AI is NOT configured (OPENAI_API_KEY missing or empty)
+ Progress: AI is evaluating locations...
+[Search] AI is configured, evaluating 50 locations...
+[AI Evaluation] Sending 50 locations to Gemini 2.5...
+[AI Evaluation] Sending 50 locations to OpenAI...
+[Search] AI evaluation complete: 0/50 locations got AI scores
+[Search] Saved results to cache for query: "32789"
 Results found: 50
-Top result: Lake Eola Charter School (school)
+Top result: Cherokee School (school)
 AI fields -> score: undefined, status: undefined, reasoning: undefined
 
 
 --- Testing Query: 59001 ---
 Geocoded to: {"lat":45.6742907,"lon":-109.7768924,"displayName":"59001, Sweet Grass County, Montana, United States","type":"postcode","class":"place","boundingBox"
+ Progress: Checking cache...
  Progress: Location found, generating search regions...
 Fetching locations for 1 region(s)
 Region 1: center=(45.6742907, -109.7768924), radius=8000m
@@ -87,8 +74,13 @@ Region 1: got 0 locations
  Progress: Collected 0 locations (1/1)
 Total unique locations collected: 0
  Progress: Found 18 locations, ranking...
-[Search] AI is NOT configured (OPENAI_API_KEY missing or empty)
+ Progress: AI is evaluating locations...
+[Search] AI is configured, evaluating 12 locations...
+[AI Evaluation] Sending 12 locations to Gemini 2.5...
+[AI Evaluation] Sending 12 locations to OpenAI...
+[Search] AI evaluation complete: 0/12 locations got AI scores
+[Search] Saved results to cache for query: "59001"
 Results found: 12
-Top result: The Fox Den Silo (hotel)
+Top result: Cabin at Greycliff Creek Ranch (hotel)
 AI fields -> score: undefined, status: undefined, reasoning: undefined
 DONE

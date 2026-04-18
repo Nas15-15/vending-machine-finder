@@ -1,0 +1,10 @@
+{
+  "server": true,
+  "rateLimit": false,
+  "fusion": true,
+  "filtering": true,
+  "vendingScore": true,
+  "ai": false,
+  "cache": true,
+  "db": false
+}

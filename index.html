@@ -16,6 +16,12 @@
             transition: opacity 0.15s ease;
         }
     </style>
+    
+    <!-- Google Fonts for Awwwards Redesign -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="/src/styles/main.css">
     <link rel="stylesheet" href="/src/styles/landing.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -54,99 +60,152 @@
             <section class="hero-wrapper">
                 <div class="hero-inner">
                     <div class="hero-badge">LOCATION INTELLIGENCE FOR VENDING</div>
-                    <h1 class="hero-title">Stop Guessing. Start Placing Machines That Profit.</h1>
-                    <p class="hero-subtitle">Most operators waste weeks driving around looking for spots. We made it so
-                        you can pick winners from your laptop.</p>
-                    <div class="cta-buttons">
-                        <a href="signup.html" class="primary-cta" style="padding: 18px 48px; font-size: 1.2rem;">Get
-                            started</a>
+                    <h1 class="hero-title">Stop Guessing.<br/>Start Placing Machines That <span style="color: var(--landing-secondary);">Profit.</span></h1>
+                    <p class="hero-subtitle">Most operators waste weeks driving around looking for spots. We built a proprietary radar system to pick winners from your laptop.</p>
+                    <div class="cta-buttons" style="align-self: flex-start; margin-left: 20px;">
+                        <a href="signup.html" class="primary-cta brutalist-btn">Initialize Scanner</a>
                     </div>
+                    
                     <div class="hero-mockup">
-                        <div
-                            style="background: #000000; height: 400px; width: 100%; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #64748b; font-weight: 600; border: 1px solid rgba(255,255,255,0.1);">
-                            [Dashboard Preview Placeholder]
+                        <!-- Pure CSS Mockup representation -->
+                        <div class="css-terminal-mockup" style="background: rgba(0,0,0,0.8); height: 500px; width: 100%; display: flex; flex-direction: column;">
+                            <div style="height: 40px; border-bottom: 1px solid var(--landing-border); display: flex; align-items: center; padding: 0 16px; gap: 8px;">
+                                <div style="width: 10px; height: 10px; border-radius: 50%; background: #333;"></div>
+                                <div style="width: 10px; height: 10px; border-radius: 50%; background: #333;"></div>
+                                <div style="width: 10px; height: 10px; border-radius: 50%; background: #333;"></div>
+                                <div style="margin-left: auto; color: var(--landing-text-muted); font-family: var(--font-body); font-size: 0.75rem;">SYSTEM.READY // 0x4B2</div>
+                            </div>
+                            <div style="flex: 1; display: grid; grid-template-columns: 300px 1fr; gap: 1px; background: var(--landing-border);">
+                                <div style="background: #050505; padding: 24px;">
+                                    <div style="height: 20px; width: 40%; background: rgba(255,255,255,0.05); margin-bottom: 24px;"></div>
+                                    <div style="height: 12px; width: 80%; background: rgba(255,255,255,0.05); margin-bottom: 12px;"></div>
+                                    <div style="height: 12px; width: 60%; background: rgba(59,130,246,0.2); margin-bottom: 12px;"></div>
+                                    <div style="height: 12px; width: 90%; background: rgba(255,255,255,0.05); margin-bottom: 32px;"></div>
+                                    <div style="height: 2px; width: 100%; background: var(--landing-border); margin-bottom: 24px;"></div>
+                                    <div style="height: 100px; width: 100%; border: 1px solid var(--landing-border); display: grid; place-items: center; color: var(--landing-secondary); font-family: var(--font-body);">[RADAR ACTIVE]</div>
+                                </div>
+                                <div style="background: #0a0a0a; position: relative; overflow: hidden;">
+                                    <!-- Map representation -->
+                                    <div style="position: absolute; width: 100%; height: 100%; background-image: radial-gradient(circle at center, rgba(59,130,246,0.1) 1px, transparent 1px); background-size: 40px 40px; opacity: 0.5;"></div>
+                                    <div style="position: absolute; top: 30%; left: 40%; width: 50px; height: 50px; border: 1px solid var(--landing-secondary); border-radius: 50%; animation: pulse 2s infinite;"></div>
+                                    <div style="position: absolute; top: 60%; left: 70%; width: 30px; height: 30px; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%;"></div>
+                                </div>
+                            </div>
                         </div>
+                    </div>
+                </div>
+                
+                <div class="hero-ticker-wrapper">
+                    <div class="hero-ticker">
+                        <span>No More Spreadsheets</span>
+                        <span>•</span>
+                        <span>Stop Driving Around</span>
+                        <span>•</span>
+                        <span>Predictive Traffic Scores</span>
+                        <span>•</span>
+                        <span>Live Competitor Maps</span>
+                        <span>•</span>
+                        <span>Unfair Advantage</span>
+                        <span>•</span>
+                        <span>No More Spreadsheets</span>
+                        <span>•</span>
+                        <span>Stop Driving Around</span>
+                        <span>•</span>
+                        <span>Predictive Traffic Scores</span>
+                        <span>•</span>
+                        <span>Live Competitor Maps</span>
+                        <span>•</span>
+                        <span>Unfair Advantage</span>
+                        <span>•</span>
+                        <span>No More Spreadsheets</span>
+                        <span>•</span>
+                        <span>Stop Driving Around</span>
                     </div>
                 </div>
             </section>
 
             <div class="sections-grid">
-                <!-- City Analysis -->
+                <!-- Location Diagnostic -->
                 <section class="grid-section">
-                    <div class="feature-visual">
-                        <div
-                            style="background: #0000001a; height: 300px; width: 100%; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #64748b; font-weight: 600; border: 1px solid rgba(255,255,255,0.1);">
-                            [City Analysis Placeholder]
-                        </div>
-                    </div>
                     <div class="section-content">
-                        <h2>Search an Entire City in Seconds</h2>
-                        <p>Type in a zip code. Get 20 ranked locations back. No spreadsheets. No manual research.</p>
+                        <h2>Run a 50-Mile Radius Diagnostic in 1.4s.</h2>
+                        <p>No spreadsheets. No "gut feelings". Input a zip code and the radar immediately flags top-tier territories, filtering out oversaturated dead zones.</p>
                         <ul class="benefit-list">
-                            <li class="benefit-item"><span class="benefit-icon benefit-check"></span> Scores for every
-                                location</li>
-                            <li class="benefit-item"><span class="benefit-icon benefit-check"></span> Filter by
-                                competition level</li>
-                            <li class="benefit-item"><span class="benefit-icon benefit-check"></span> Export to CSV or
-                                PDF</li>
+                            <li class="benefit-item"><span class="benefit-icon benefit-check"></span> Algorithmic Score Generation</li>
+                            <li class="benefit-item"><span class="benefit-icon benefit-check"></span> Hard Competition Exclusion</li>
+                            <li class="benefit-item"><span class="benefit-icon benefit-check"></span> Instant Coordinates Export</li>
                         </ul>
+                    </div>
+                    <div class="feature-visual">
+                        <div style="padding: 40px 20px; font-family: var(--font-body); color: var(--landing-text-muted);">
+                            <div style="margin-bottom: 20px;">> SCANNING_RADIUS: 50mi</div>
+                            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                <div style="background: rgba(59,130,246,0.3); width: 80%; height: 2px;"></div>
+                                <div style="background: var(--landing-secondary); width: 20%; height: 2px;"></div>
+                            </div>
+                            <div style="font-size: 0.8rem; margin-bottom: 30px;">[20] HIGH_PROBABILITY_ZONES_FOUND</div>
+                            
+                            <div style="display: grid; gap: 10px;">
+                                <div style="border: 1px solid rgba(255,255,255,0.1); padding: 10px; display: flex; justify-content: space-between;">
+                                    <span>TARGET_001 [HOSPITAL]</span><span style="color: var(--landing-secondary);">SYS.SCORE: 98</span>
+                                </div>
+                                <div style="border: 1px solid rgba(255,255,255,0.1); padding: 10px; display: flex; justify-content: space-between;">
+                                    <span>TARGET_002 [UNIVERSITY]</span><span style="color: var(--landing-secondary);">SYS.SCORE: 92</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
-                <!-- Street View -->
+                <!-- Competitor Mapping -->
                 <section class="grid-section reverse">
-                    <div class="feature-visual">
-                        <div
-                            style="background: #0a0a0a; height: 300px; width: 100%; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #64748b; font-weight: 600; border: 1px solid rgba(255,255,255,0.1);">
-                            [Street View Placeholder]
-                        </div>
-                    </div>
                     <div class="section-content">
-                        <h2>Check Spots Without Driving There</h2>
-                        <p>Built-in Street View for every location. See the entrance, check if there is already a
-                            machine. All from your screen.</p>
+                        <h2>Visual Ground Truth Before You Drive.</h2>
+                        <p>Embedded street intelligence. Verify building access, estimate footfall choke points, and spot existing competitor machines directly from your terminal.</p>
                         <ul class="benefit-list">
-                            <li class="benefit-item"><span class="benefit-icon benefit-check"></span> Embedded Street
-                                View</li>
-                            <li class="benefit-item"><span class="benefit-icon benefit-check"></span> Spot existing
-                                machines</li>
-                            <li class="benefit-item"><span class="benefit-icon benefit-check"></span> Check building
-                                access</li>
+                            <li class="benefit-item"><span class="benefit-icon benefit-check"></span> Unrestricted Street-Level Scans</li>
+                            <li class="benefit-item"><span class="benefit-icon benefit-check"></span> Blindspot Verification</li>
+                            <li class="benefit-item"><span class="benefit-icon benefit-check"></span> Pre-negotiation Intel</li>
                         </ul>
+                    </div>
+                    <div class="feature-visual" style="background-image: repeating-linear-gradient(45deg, #0a0a0a 25%, transparent 25%, transparent 75%, #0a0a0a 75%, #0a0a0a), repeating-linear-gradient(45deg, #0a0a0a 25%, #050505 25%, #050505 75%, #0a0a0a 75%, #0a0a0a); background-position: 0 0, 10px 10px; background-size: 20px 20px; display: grid; place-items: center;">
+                        <div style="border: 1px solid var(--landing-secondary); padding: 20px; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);">
+                            <div style="width: 150px; height: 150px; border-radius: 50%; border: 1px dashed var(--landing-secondary); position: relative; animation: spin 10s linear infinite;">
+                                <div style="position: absolute; top: 0; left: 50%; width: 2px; height: 50%; background: var(--landing-secondary); transform-origin: bottom;"></div>
+                            </div>
+                        </div>
                     </div>
                 </section>
             </div>
 
             <!-- Methodology Section -->
             <section class="trust-section">
-                <h2>The Data Behind Every Score</h2>
-                <p style="max-width: 600px; margin: 0 auto; color: var(--landing-text-muted);">Each location gets a
-                    score based on real numbers, not gut feelings. Here is what we look at.</p>
+                <h2>RADAR TELEMETRY METRICS</h2>
+                <p style="max-width: 600px; margin: 0 auto; color: var(--landing-text-muted); font-family: var(--font-body); font-size: 0.9rem;">
+                    > ALGORITHM_PARAMETERS // v2.1.4<br/>
+                    Every coordinate is processed through 3 distinct data pipelines.
+                </p>
                 <div class="trust-grid">
-                    <div class="trust-card">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
-                            <circle cx="12" cy="12" r="10" />
-                            <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
-                            <path d="M2 12h20" />
-                        </svg>
-                        <h3>Foot Traffic</h3>
-                        <p>How many people walk by daily. We pull this from mobile location data.</p>
+                    <div class="trust-card" style="text-align: left; position: relative;">
+                        <div style="font-family: var(--font-body); font-size: 0.75rem; color: var(--landing-secondary); margin-bottom: 20px;">[DATASTREAM: 01]</div>
+                        <div class="data-counter" data-target="150000" style="font-size: 2.5rem; font-family: var(--font-heading); color: #fff; font-weight: 700;">0</div>
+                        <h3 style="font-family: var(--font-body); text-transform: uppercase;">Daily Mobile Pings</h3>
+                        <p>We analyze aggregate cell tower telemetry to establish a median foot traffic baseline. Pure volume metrics.</p>
+                        <div style="position: absolute; bottom: 0; right: 0; width: 40px; height: 40px; border-top: 1px solid var(--landing-border); border-left: 1px solid var(--landing-border);"></div>
                     </div>
-                    <div class="trust-card">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
-                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                            <circle cx="8.5" cy="7" r="4" />
-                            <path d="M20 8v6M23 11h-6" />
-                        </svg>
-                        <h3>Competition</h3>
-                        <p>We map existing vending machines within 500m so you avoid saturated spots.</p>
+                    <div class="trust-card" style="text-align: left; position: relative;">
+                        <div style="font-family: var(--font-body); font-size: 0.75rem; color: var(--landing-secondary); margin-bottom: 20px;">[DATASTREAM: 02]</div>
+                        <div class="data-counter" data-target="500" style="font-size: 2.5rem; font-family: var(--font-heading); color: #fff; font-weight: 700;">0</div>
+                        <h3 style="font-family: var(--font-body); text-transform: uppercase;">Meter Conflict Zone</h3>
+                        <p>Scanning radius identifying registered vendors within 500m to aggressively downgrade oversaturated assets.</p>
+                        <div style="position: absolute; bottom: 0; right: 0; width: 40px; height: 40px; border-top: 1px solid var(--landing-border); border-left: 1px solid var(--landing-border);"></div>
                     </div>
-                    <div class="trust-card">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                        </svg>
-                        <h3>Demographics</h3>
-                        <p>Age and income data for the area. Know who is walking by before you commit.</p>
+                    <div class="trust-card" style="text-align: left; position: relative;">
+                        <div style="font-family: var(--font-body); font-size: 0.75rem; color: var(--landing-secondary); margin-bottom: 20px;">[DATASTREAM: 03]</div>
+                        <div class="data-counter" data-target="98" style="font-size: 2.5rem; font-family: var(--font-heading); color: #fff; font-weight: 700;">0</div>
+                        <h3 style="font-family: var(--font-body); text-transform: uppercase;">Peak Correlation %</h3>
+                        <p>Cross-referencing venue operational hours against demographic spending spikes to predict cashflow density.</p>
+                        <div style="position: absolute; bottom: 0; right: 0; width: 40px; height: 40px; border-top: 1px solid var(--landing-border); border-left: 1px solid var(--landing-border);"></div>
                     </div>
                 </div>
             </section>
@@ -991,6 +1050,56 @@
     </div>
 
     <script type="module" src="/src/pages/home.js"></script>
+
+    <!-- Awwwards Interactive Scroll Counters -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const counters = document.querySelectorAll('.data-counter');
+            
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const target = entry.target;
+                        const targetNumber = parseInt(target.getAttribute('data-target'));
+                        const duration = 2000; // 2 seconds
+                        const frameRate = 60;
+                        const totalFrames = Math.round(duration / (1000 / frameRate));
+                        
+                        let frame = 0;
+                        
+                        // Easing function for intense slow-down at end
+                        const easeOutExpo = (x) => {
+                            return x === 1 ? 1 : 1 - Math.pow(2, -10 * x);
+                        };
+
+                        const counter = setInterval(() => {
+                            frame++;
+                            const progress = easeOutExpo(frame / totalFrames);
+                            const currentVal = Math.round(targetNumber * progress);
+                            target.innerText = currentVal >= 1000 ? (currentVal / 1000).toFixed(1) + 'k' : currentVal + (targetNumber === 98 ? '%' : '');
+                            
+                            if (frame === totalFrames) {
+                                clearInterval(counter);
+                                target.innerText = targetNumber >= 1000 ? (targetNumber / 1000).toFixed(1) + 'k+' : targetNumber + (targetNumber === 98 ? '%' : 'm');
+                            }
+                        }, 1000 / frameRate);
+                        
+                        observer.unobserve(target); // Only animate once
+                    }
+                });
+            }, observerOptions);
+
+            counters.forEach(counter => {
+                observer.observe(counter);
+            });
+        });
+    </script>
 </body>
 
 </html>

@@ -20,7 +20,7 @@ This is the blueprint to turn this tool from a simple location finder into a mon
 9. **Weather & Climate API**: 
    - **How it Works:** Factors local climate severity into the algorithm.
    - **Why it Prints Money:** Beverage sales in Texas summer are fundamentally different than in Maine. The AI suggests hydration-heavy machine setups down south..
-
+    
 ## PART 2: The "Lead-Gen" CRM (Automated Selling)
 12. **Decision Maker Contact Scraping**: 
     - **How it Works:** Connects to Apollo/Hunter APIs to pull the HR or Facility Manager’s direct email.
@@ -99,21 +99,9 @@ This is the blueprint to turn this tool from a simple location finder into a mon
 83. **Equipment Financing Portal**: 
     - **How it Works:** Integrates with lenders to pre-approve operators for $50k machine loans directly in our UI.
     - **Why it Prints Money:** We collect lead generation bounties from commercial lenders while removing growth friction for our users.
-84. **Wholesaler Sponsorships**: 
-    - **How it Works:** Brands like Gatorade pay us to recommend their products as "top sellers" in the app.
-    - **Why it Prints Money:** Direct ad revenue natively injected into the workflow of operators.
 85. **Vending Broker Network**: 
     - **How it Works:** Certifies users as "Master Brokers" who find locations and sell the leads to newer operators for cash.
     - **Why it Prints Money:** Fosters a micro-economy on the platform that we take a transaction fee on.
-86. **Insurance Marketplace**: 
-    - **How it Works:** We instant-quote General Liability insurance natively.
-    - **Why it Prints Money:** Recurring commission splits with the insurance carriers on every policy written.
-87. **The "Billion Dollar" Aggregation**: 
-    - **How it Works:** We use the purchasing momentum of 10,000 operators to negotiate huge product discounts from manufacturers.
-    - **Why it Prints Money:** We act as a Group Purchasing Organization (GPO), taking a sliver of every wholesale transaction.
-88. **Telemetry Data Selling**: 
-    - **How it Works:** We aggregate anonymized snack sales data across the US.
-    - **Why it Prints Money:** Companies like Mars or Frito-Lay will pay millions for real-time insights on which snacks are dying and which are surging.
 89. **Direct-from-Manufacturer Deals**: 
     - **How it Works:** We partner directly with Crane or AMS to sell machines directly in our dashboard dashboard.
     - **Why it Prints Money:** Eliminates the middle-man, and we act as the highest-converting digital dealership in the world.
