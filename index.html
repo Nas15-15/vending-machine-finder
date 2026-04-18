@@ -17,10 +17,10 @@
         }
     </style>
     
-    <!-- Google Fonts for Awwwards Redesign -->
+    <!-- Google Fonts for High-Trust UI -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="/src/styles/main.css">
     <link rel="stylesheet" href="/src/styles/landing.css">
@@ -59,67 +59,74 @@
         <div id="landingSection" class="landing-container">
             <section class="hero-wrapper">
                 <div class="hero-inner">
-                    <div class="hero-badge">LOCATION INTELLIGENCE FOR VENDING</div>
-                    <h1 class="hero-title">Stop Guessing.<br/>Start Placing Machines That <span style="color: var(--landing-secondary);">Profit.</span></h1>
-                    <p class="hero-subtitle">Most operators waste weeks driving around looking for spots. We built a proprietary radar system to pick winners from your laptop.</p>
-                    <div class="cta-buttons" style="align-self: flex-start; margin-left: 20px;">
-                        <a href="signup.html" class="primary-cta brutalist-btn">Initialize Scanner</a>
+                    <div class="hero-badge">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        <span style="margin-left: 8px; color: var(--landing-text-muted);">Trusted by 400+ Operators</span>
+                    </div>
+                    <h1 class="hero-title">Find Profitable Vending Locations Instantly with Predictive Traffic Data.</h1>
+                    <p class="hero-subtitle">Stop wasting weeks driving around. We use 14M daily mobile pings and live mapping APIs to score the most profitable spots in your zip code.</p>
+                    
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                        <a href="signup.html" class="primary-cta">Start Free Search</a>
+                        <span class="cta-microcopy">1. Enter Zip → 2. Run Diagnostic → 3. View Top Spots</span>
                     </div>
                     
                     <div class="hero-mockup">
-                        <!-- Pure CSS Mockup representation -->
-                        <div class="css-terminal-mockup" style="background: rgba(0,0,0,0.8); height: 500px; width: 100%; display: flex; flex-direction: column;">
-                            <div style="height: 40px; border-bottom: 1px solid var(--landing-border); display: flex; align-items: center; padding: 0 16px; gap: 8px;">
-                                <div style="width: 10px; height: 10px; border-radius: 50%; background: #333;"></div>
-                                <div style="width: 10px; height: 10px; border-radius: 50%; background: #333;"></div>
-                                <div style="width: 10px; height: 10px; border-radius: 50%; background: #333;"></div>
-                                <div style="margin-left: auto; color: var(--landing-text-muted); font-family: var(--font-body); font-size: 0.75rem;">SYSTEM.READY // 0x4B2</div>
-                            </div>
-                            <div style="flex: 1; display: grid; grid-template-columns: 300px 1fr; gap: 1px; background: var(--landing-border);">
-                                <div style="background: #050505; padding: 24px;">
-                                    <div style="height: 20px; width: 40%; background: rgba(255,255,255,0.05); margin-bottom: 24px;"></div>
-                                    <div style="height: 12px; width: 80%; background: rgba(255,255,255,0.05); margin-bottom: 12px;"></div>
-                                    <div style="height: 12px; width: 60%; background: rgba(59,130,246,0.2); margin-bottom: 12px;"></div>
-                                    <div style="height: 12px; width: 90%; background: rgba(255,255,255,0.05); margin-bottom: 32px;"></div>
-                                    <div style="height: 2px; width: 100%; background: var(--landing-border); margin-bottom: 24px;"></div>
-                                    <div style="height: 100px; width: 100%; border: 1px solid var(--landing-border); display: grid; place-items: center; color: var(--landing-secondary); font-family: var(--font-body);">[RADAR ACTIVE]</div>
+                        <!-- High Fidelity UI Panel -->
+                        <div style="background: #ffffff; width: 100%; border-radius: 12px; display: flex; flex-direction: column;">
+                            <!-- Header -->
+                            <div style="padding: 16px 24px; border-bottom: 1px solid var(--landing-border); display: flex; justify-content: space-between; align-items: center; background: #f8fafc;">
+                                <div style="display: flex; gap: 12px; align-items: center;">
+                                    <div style="width: 32px; height: 32px; background: #e0f2fe; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                                    </div>
+                                    <div>
+                                        <h3 style="font-size: 1rem; color: #0f172a; margin: 0; font-weight: 600;">Memorial Hospital Main Wing</h3>
+                                        <p style="font-size: 0.85rem; color: #64748b; margin: 0;">1200 S Figueroa St, Los Angeles, CA</p>
+                                    </div>
                                 </div>
-                                <div style="background: #0a0a0a; position: relative; overflow: hidden;">
-                                    <!-- Map representation -->
-                                    <div style="position: absolute; width: 100%; height: 100%; background-image: radial-gradient(circle at center, rgba(59,130,246,0.1) 1px, transparent 1px); background-size: 40px 40px; opacity: 0.5;"></div>
-                                    <div style="position: absolute; top: 30%; left: 40%; width: 50px; height: 50px; border: 1px solid var(--landing-secondary); border-radius: 50%; animation: pulse 2s infinite;"></div>
-                                    <div style="position: absolute; top: 60%; left: 70%; width: 30px; height: 30px; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%;"></div>
+                                <div style="background: #ecfdf5; color: #059669; padding: 6px 12px; border-radius: 999px; font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                    Top 1% Territory
+                                </div>
+                            </div>
+                            
+                            <!-- Metrics -->
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); padding: 24px; gap: 24px;">
+                                <div style="border-right: 1px solid var(--landing-border);">
+                                    <p style="font-size: 0.85rem; color: #64748b; margin: 0 0 8px 0; font-weight: 500; text-transform: uppercase;">Est. Daily Foot Traffic</p>
+                                    <p style="font-size: 2rem; color: #0f172a; margin: 0; font-weight: 700;">14,200 <span style="font-size: 1rem; color: #10b981;">↑ 12%</span></p>
+                                </div>
+                                <div style="border-right: 1px solid var(--landing-border);">
+                                    <p style="font-size: 0.85rem; color: #64748b; margin: 0 0 8px 0; font-weight: 500; text-transform: uppercase;">Competitors in 500m</p>
+                                    <p style="font-size: 2rem; color: #0f172a; margin: 0; font-weight: 700;">0 <span style="font-size: 1rem; color: #64748b;">Clear Zone</span></p>
+                                </div>
+                                <div>
+                                    <p style="font-size: 0.85rem; color: #64748b; margin: 0 0 8px 0; font-weight: 500; text-transform: uppercase;">System Approval Score</p>
+                                    <p style="font-size: 2rem; color: #f97316; margin: 0; font-weight: 700;">98<span style="font-size: 1.25rem;">/100</span></p>
+                                </div>
+                            </div>
+                            <!-- Fake Map Area -->
+                            <div style="height: 180px; background: #cbd5e1; position: relative;">
+                                <div style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                                    <div style="padding: 8px 16px; background: rgba(255,255,255,0.9); border-radius: 8px; font-weight: 600; color: #334155; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);">Street View Activated</div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                
-                <div class="hero-ticker-wrapper">
-                    <div class="hero-ticker">
-                        <span>No More Spreadsheets</span>
-                        <span>•</span>
-                        <span>Stop Driving Around</span>
-                        <span>•</span>
-                        <span>Predictive Traffic Scores</span>
-                        <span>•</span>
-                        <span>Live Competitor Maps</span>
-                        <span>•</span>
-                        <span>Unfair Advantage</span>
-                        <span>•</span>
-                        <span>No More Spreadsheets</span>
-                        <span>•</span>
-                        <span>Stop Driving Around</span>
-                        <span>•</span>
-                        <span>Predictive Traffic Scores</span>
-                        <span>•</span>
-                        <span>Live Competitor Maps</span>
-                        <span>•</span>
-                        <span>Unfair Advantage</span>
-                        <span>•</span>
-                        <span>No More Spreadsheets</span>
-                        <span>•</span>
-                        <span>Stop Driving Around</span>
                     </div>
                 </div>
             </section>
@@ -128,99 +135,104 @@
                 <!-- Location Diagnostic -->
                 <section class="grid-section">
                     <div class="section-content">
-                        <h2>Run a 50-Mile Radius Diagnostic in 1.4s.</h2>
-                        <p>No spreadsheets. No "gut feelings". Input a zip code and the radar immediately flags top-tier territories, filtering out oversaturated dead zones.</p>
+                        <h2>Run a 50-Mile Radius Diagnostic in Seconds</h2>
+                        <p>No spreadsheets. No guessing games. Input a zip code and our system immediately flags top-tier territories, filtering out dead zones based on historical foot traffic.</p>
                         <ul class="benefit-list">
-                            <li class="benefit-item"><span class="benefit-icon benefit-check"></span> Algorithmic Score Generation</li>
-                            <li class="benefit-item"><span class="benefit-icon benefit-check"></span> Hard Competition Exclusion</li>
-                            <li class="benefit-item"><span class="benefit-icon benefit-check"></span> Instant Coordinates Export</li>
+                            <li class="benefit-item"><span class="benefit-icon">✓</span> Algorithmic Score Generation</li>
+                            <li class="benefit-item"><span class="benefit-icon">✓</span> Hard Competition Exclusion</li>
+                            <li class="benefit-item"><span class="benefit-icon">✓</span> Instant Coordinates Export</li>
                         </ul>
                     </div>
-                    <div class="feature-visual">
-                        <div style="padding: 40px 20px; font-family: var(--font-body); color: var(--landing-text-muted);">
-                            <div style="margin-bottom: 20px;">> SCANNING_RADIUS: 50mi</div>
-                            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                                <div style="background: rgba(59,130,246,0.3); width: 80%; height: 2px;"></div>
-                                <div style="background: var(--landing-secondary); width: 20%; height: 2px;"></div>
-                            </div>
-                            <div style="font-size: 0.8rem; margin-bottom: 30px;">[20] HIGH_PROBABILITY_ZONES_FOUND</div>
-                            
-                            <div style="display: grid; gap: 10px;">
-                                <div style="border: 1px solid rgba(255,255,255,0.1); padding: 10px; display: flex; justify-content: space-between;">
-                                    <span>TARGET_001 [HOSPITAL]</span><span style="color: var(--landing-secondary);">SYS.SCORE: 98</span>
-                                </div>
-                                <div style="border: 1px solid rgba(255,255,255,0.1); padding: 10px; display: flex; justify-content: space-between;">
-                                    <span>TARGET_002 [UNIVERSITY]</span><span style="color: var(--landing-secondary);">SYS.SCORE: 92</span>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="feature-visual" style="display: flex; align-items: center; justify-content: center; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px;">
+                        <img src="https://via.placeholder.com/500x300.png?text=Location+Diagnostic+UI" alt="UI Snippet" style="width: 100%; height: auto; border-radius: 8px; box-shadow: var(--shadow-card);" />
                     </div>
                 </section>
 
                 <!-- Competitor Mapping -->
                 <section class="grid-section reverse">
                     <div class="section-content">
-                        <h2>Visual Ground Truth Before You Drive.</h2>
-                        <p>Embedded street intelligence. Verify building access, estimate footfall choke points, and spot existing competitor machines directly from your terminal.</p>
+                        <h2>Visual Ground Truth Before You Drive</h2>
+                        <p>Embedded street intelligence. Verify building access, estimate footfall choke points, and spot existing competitor machines directly from your dashboard.</p>
                         <ul class="benefit-list">
-                            <li class="benefit-item"><span class="benefit-icon benefit-check"></span> Unrestricted Street-Level Scans</li>
-                            <li class="benefit-item"><span class="benefit-icon benefit-check"></span> Blindspot Verification</li>
-                            <li class="benefit-item"><span class="benefit-icon benefit-check"></span> Pre-negotiation Intel</li>
+                            <li class="benefit-item"><span class="benefit-icon">✓</span> Unrestricted Street-Level Scans</li>
+                            <li class="benefit-item"><span class="benefit-icon">✓</span> Blindspot Verification</li>
+                            <li class="benefit-item"><span class="benefit-icon">✓</span> Pre-negotiation Intel</li>
                         </ul>
                     </div>
-                    <div class="feature-visual" style="background-image: repeating-linear-gradient(45deg, #0a0a0a 25%, transparent 25%, transparent 75%, #0a0a0a 75%, #0a0a0a), repeating-linear-gradient(45deg, #0a0a0a 25%, #050505 25%, #050505 75%, #0a0a0a 75%, #0a0a0a); background-position: 0 0, 10px 10px; background-size: 20px 20px; display: grid; place-items: center;">
-                        <div style="border: 1px solid var(--landing-secondary); padding: 20px; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);">
-                            <div style="width: 150px; height: 150px; border-radius: 50%; border: 1px dashed var(--landing-secondary); position: relative; animation: spin 10s linear infinite;">
-                                <div style="position: absolute; top: 0; left: 50%; width: 2px; height: 50%; background: var(--landing-secondary); transform-origin: bottom;"></div>
-                            </div>
-                        </div>
+                    <div class="feature-visual" style="display: flex; align-items: center; justify-content: center; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px;">
+                        <img src="https://via.placeholder.com/500x300.png?text=Street+View+Map+UI" alt="Competitor UI Snippet" style="width: 100%; height: auto; border-radius: 8px; box-shadow: var(--shadow-card);" />
                     </div>
                 </section>
             </div>
 
             <!-- Methodology Section -->
             <section class="trust-section">
-                <h2>RADAR TELEMETRY METRICS</h2>
-                <p style="max-width: 600px; margin: 0 auto; color: var(--landing-text-muted); font-family: var(--font-body); font-size: 0.9rem;">
-                    > ALGORITHM_PARAMETERS // v2.1.4<br/>
-                    Every coordinate is processed through 3 distinct data pipelines.
+                <h2>The Data Behind Every Score</h2>
+                <p style="max-width: 600px; margin: 0 auto; color: var(--landing-text-muted); font-size: 1.1rem; line-height: 1.6;">
+                    We don't use guesswork. Every location is run through predictive scoring models powered by aggregated mobile patterns and competitor density algorithms.
                 </p>
                 <div class="trust-grid">
-                    <div class="trust-card" style="text-align: left; position: relative;">
-                        <div style="font-family: var(--font-body); font-size: 0.75rem; color: var(--landing-secondary); margin-bottom: 20px;">[DATASTREAM: 01]</div>
-                        <div class="data-counter" data-target="150000" style="font-size: 2.5rem; font-family: var(--font-heading); color: #fff; font-weight: 700;">0</div>
-                        <h3 style="font-family: var(--font-body); text-transform: uppercase;">Daily Mobile Pings</h3>
-                        <p>We analyze aggregate cell tower telemetry to establish a median foot traffic baseline. Pure volume metrics.</p>
-                        <div style="position: absolute; bottom: 0; right: 0; width: 40px; height: 40px; border-top: 1px solid var(--landing-border); border-left: 1px solid var(--landing-border);"></div>
+                    <div class="trust-card">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--landing-secondary)" stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+                            <path d="M2 12h20" />
+                        </svg>
+                        <div class="data-counter" data-target="150000" style="font-size: 2.5rem; font-family: var(--font-heading); color: var(--landing-text-main); font-weight: 800;">0</div>
+                        <h3>Daily Mobile Pings Analyzed</h3>
+                        <p>We analyze aggregate cell tower telemetry to establish a median foot traffic baseline so you place machines in high-volume areas.</p>
                     </div>
-                    <div class="trust-card" style="text-align: left; position: relative;">
-                        <div style="font-family: var(--font-body); font-size: 0.75rem; color: var(--landing-secondary); margin-bottom: 20px;">[DATASTREAM: 02]</div>
-                        <div class="data-counter" data-target="500" style="font-size: 2.5rem; font-family: var(--font-heading); color: #fff; font-weight: 700;">0</div>
-                        <h3 style="font-family: var(--font-body); text-transform: uppercase;">Meter Conflict Zone</h3>
-                        <p>Scanning radius identifying registered vendors within 500m to aggressively downgrade oversaturated assets.</p>
-                        <div style="position: absolute; bottom: 0; right: 0; width: 40px; height: 40px; border-top: 1px solid var(--landing-border); border-left: 1px solid var(--landing-border);"></div>
+                    <div class="trust-card">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--landing-secondary)" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                            <circle cx="8.5" cy="7" r="4" />
+                            <path d="M20 8v6M23 11h-6" />
+                        </svg>
+                        <div class="data-counter" data-target="500" style="font-size: 2.5rem; font-family: var(--font-heading); color: var(--landing-text-main); font-weight: 800;">0</div>
+                        <h3>Meter Avoidance Zones</h3>
+                        <p>Our scanning radius immediately flags existing vendors within 500m to downgrade oversaturated and overly-competitive assets.</p>
                     </div>
-                    <div class="trust-card" style="text-align: left; position: relative;">
-                        <div style="font-family: var(--font-body); font-size: 0.75rem; color: var(--landing-secondary); margin-bottom: 20px;">[DATASTREAM: 03]</div>
-                        <div class="data-counter" data-target="98" style="font-size: 2.5rem; font-family: var(--font-heading); color: #fff; font-weight: 700;">0</div>
-                        <h3 style="font-family: var(--font-body); text-transform: uppercase;">Peak Correlation %</h3>
-                        <p>Cross-referencing venue operational hours against demographic spending spikes to predict cashflow density.</p>
-                        <div style="position: absolute; bottom: 0; right: 0; width: 40px; height: 40px; border-top: 1px solid var(--landing-border); border-left: 1px solid var(--landing-border);"></div>
+                    <div class="trust-card">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--landing-secondary)" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
+                        <div class="data-counter" data-target="98" style="font-size: 2.5rem; font-family: var(--font-heading); color: var(--landing-text-main); font-weight: 800;">0</div>
+                        <h3>Cashflow Target Accuracy</h3>
+                        <p>By cross-referencing demographic spending indices, we can confidently isolate locations with high-purchase propensity.</p>
                     </div>
                 </div>
+            </section>
+            
+            <!-- Objections FAQ -->
+            <section class="faq-section">
+                <h2>Frequent Questions</h2>
+                <details class="faq-item">
+                    <summary>How do you avoid dead zones?</summary>
+                    <div class="faq-content">We merge real-time aggregate footfall metrics with historical demographic spending indices. If a location doesn't hit a minimum threshold of daily unique visitors, our system flags it immediately and lowers its score.</div>
+                </details>
+                <details class="faq-item">
+                    <summary>What counts as a competitor?</summary>
+                    <div class="faq-content">We actively track registered commercial vending machines, snack kiosks, and hyper-local convenience stores operating within a 500-meter radius of your target coordinate.</div>
+                </details>
+                <details class="faq-item">
+                    <summary>Do you include building access constraints?</summary>
+                    <div class="faq-content">Yes. Using our integrated Street View terminal, operators can manually confirm loading zones, ramp access, and door dimensions before making a call.</div>
+                </details>
+                <details class="faq-item">
+                    <summary>What does a free search actually show?</summary>
+                    <div class="faq-content">Your first search returns real data. You will see authentic foot traffic estimates, competitor mapping, and an overall System Score for top locations in your selected zip code. No credit card required.</div>
+                </details>
             </section>
 
 
 
             <!-- Final CTA -->
-            <section class="footer-cta">
-                <h2 class="hero-title" style="color: white;">Try a Free Search</h2>
-                <p style="margin-bottom: 40px; font-size: 1.25rem;">Enter any zip code. See the top spots. Decide if it
-                    is worth it.</p>
-                <div class="cta-buttons">
-                    <a href="signup.html" class="primary-cta"
-                        style="background: white; color: var(--landing-primary); padding: 18px 48px; font-size: 1.2rem;">Get
-                        started</a>
+            <section class="footer-cta" style="background: var(--landing-card-bg); padding: 120px 20px; text-align: center; border-top: 1px solid var(--landing-border);">
+                <h2 style="font-size: 3rem; color: var(--landing-text-main); font-weight: 800; margin-bottom: 16px;">Ready to find your first spot?</h2>
+                <p style="margin-bottom: 40px; font-size: 1.25rem; color: var(--landing-text-muted);">Enter any zip code. See the top spots. Decide if it is worth it.</p>
+                <div style="display: flex; flex-direction: column; align-items: center;">
+                    <a href="signup.html" class="primary-cta">Start Free Search</a>
+                    <span class="cta-microcopy">1. Enter Zip → 2. Run Diagnostic → 3. View Top Spots</span>
                 </div>
             </section>
         </div>
